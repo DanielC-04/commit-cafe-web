@@ -28,7 +28,10 @@ const {
 
 const SITE_NAME = "Commit&Cafe";
 const fullTitle = title === SITE_NAME ? title : `${title} · ${SITE_NAME}`;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+// Con build.format "file" Astro ve rutas como /index.html o /estudio.html,
+// pero la URL pública limpia es / o /estudio (Netlify sirve ambas).
+const cleanPath = Astro.url.pathname.replace(/(index)?\.html$/, "");
+const canonical = new URL(cleanPath, Astro.site);
 const ogUrl = new URL(ogImage, Astro.site);
 ---
 
