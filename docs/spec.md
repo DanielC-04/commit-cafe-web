@@ -114,7 +114,7 @@ Reglas: la sección **Pizarra** se invierte (fondo crema, tinta carbón, subraya
 
 En Pizarra el **anillo de foco es carbón**, no naranja (WCAG 2.2 pide ≥ 3:1 para el foco). El naranja ahí solo decora (subrayados gruesos, formas). Tema oscuro por defecto (`color-scheme: dark`); modo claro, no en el inicio. Sobre crema se usa el logo `monocromo_oscuro.svg`.
 
-**Tipografía:** títulos en una geométrica redondeada cercana al logo: **Outfit** o **Nunito** (el texto del logo tiene terminaciones redondeadas; se elige comparándolas en la página de prueba de la fase 0 y se anota en `docs/decisiones.md`); texto en una humanista distinta (**Figtree**); monoespaciada (**JetBrains Mono**) **solo para código real**: hashes, comandos, terminal. Pizarra: la letra manuscrita de la persona escaneada, o una fuente manuscrita como respaldo. Líneas de texto de menos de 80 caracteres.
+**Tipografía:** títulos en una geométrica redondeada cercana al logo: **Outfit** (elegida frente a Nunito en la fase 0); texto en una humanista distinta (**Figtree**); monoespaciada (**JetBrains Mono**) **solo para código real**: hashes, comandos, terminal. Pizarra: la letra manuscrita de la persona escaneada, o una fuente manuscrita como respaldo. Líneas de texto de menos de 80 caracteres.
 
 **Maquetación:** escritorio con columna izquierda fija (~5/12) y contenido a la derecha (~7/12). En móvil, la columna fija se reduce a una cabecera con la taza y el estado, y el resto va en una sola columna.
 

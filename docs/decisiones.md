@@ -21,7 +21,7 @@ Registro corto de decisiones y su porqué. La más nueva va arriba.
 - **Astro 7.4.7 y TypeScript 6.** `@astrojs/check` todavía no admite TypeScript 7. Cuando lo admita, se actualiza.
 - **pnpm con `minimumReleaseAge: 20160`.** Aplica sola la regla de no instalar versiones de menos de 14 días. Por eso no tenemos el último parche de cada paquete, y está bien así.
 - **Fuentes con la API de Astro (proveedor Fontsource).** En vez de instalar paquetes `@fontsource-variable/*`, Astro descarga las fuentes en el build, las sirve desde nuestro dominio, precarga solo Outfit y Figtree y genera fuentes de respaldo con métricas parecidas para evitar saltos de texto.
-- **Títulos: Outfit vs Nunito → [POR COMPLETAR].** Las dos están cargadas en la página de prueba. Cuando elijas una, se cambia `--fuente-titulos` en `tokens.css` y se borra la otra de `astro.config.mjs`.
+- **Títulos: Outfit** (elegida por la persona tras compararla con Nunito en la página de prueba). Nunito se quitó de `astro.config.mjs`.
 - **CSP en dos partes.** Astro pone una `<meta>` con hashes de scripts y estilos; `public/_headers` añade lo que una `<meta>` no puede (`frame-ancestors`, etc.). Consecuencia: no se pueden usar `style="..."` ni `onclick`.
 - **Solo tema oscuro.** `color-scheme: dark` en `:root`. La Pizarra cambia a `color-scheme: light` con la clase `.pizarra`.
 - **`SITE_URL`.** La URL pública se define como variable de entorno en el hosting. Sin ella, el build usa `http://localhost:4321` (solo sirve en local).

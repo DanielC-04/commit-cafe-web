@@ -38,15 +38,6 @@ export default defineConfig({
       fallbacks: ["sans-serif"],
     },
     {
-      // Candidata alternativa para títulos (fase 0: comparar con Outfit).
-      provider: fontProviders.fontsource(),
-      name: "Nunito",
-      cssVariable: "--font-nunito",
-      weights: ["400 800"],
-      subsets: ["latin"],
-      fallbacks: ["sans-serif"],
-    },
-    {
       provider: fontProviders.fontsource(),
       name: "Figtree",
       cssVariable: "--font-figtree",
