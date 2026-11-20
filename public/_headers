@@ -1,0 +1,21 @@
+# Cabeceras de seguridad (Cloudflare las lee de este archivo).
+# La CSP de scripts y estilos la pone Astro en cada página con hashes
+# (security.csp en astro.config.mjs). Aquí va la parte que una <meta>
+# no puede expresar, como frame-ancestors. Si se añade un origen externo
+# (YouTube, analítica), se suma aquí y en astro.config.mjs. Ver spec 9.
+#
+# Ojo: el navegador aplica las DOS políticas (esta y la <meta>) y solo
+# permite lo que ambas permiten. Por eso aquí script-src/style-src llevan
+# 'unsafe-inline': la <meta> de Astro ya limita lo inline a los hashes
+# exactos, y si aquí lo prohibiéramos, bloquearíamos también lo legítimo.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

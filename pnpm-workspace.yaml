@@ -1,0 +1,16 @@
+# Seguridad de dependencias: pnpm no instalará versiones publicadas hace
+# menos de 14 días (20160 minutos). Así se cumple la regla de la spec sin
+# tener que acordarse a mano. Ver docs/decisiones.md.
+minimumReleaseAge: 20160
+
+# Paquetes que necesitan ejecutar scripts al instalarse (sharp descarga
+# su binario de imágenes, esbuild el suyo). El resto no puede.
+overrides:
+  # astro check falla ("bridge.deleteEnv is not a function") si pnpm
+  # resuelve este paquete a la 2.0.0-beta.2, incompatible con
+  # @emnapi/core 1.x. Se fija la estable. Revisar al actualizar @astrojs/check.
+  "@emnapi/runtime": "1.11.3"
+
+allowBuilds:
+  sharp: true
+  esbuild: true

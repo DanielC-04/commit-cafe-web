@@ -1,0 +1,66 @@
+---
+/*
+  DeskLayout: la "mesa de trabajo" (spec 7, Maquetación).
+  - Escritorio: columna izquierda fija (~5/12) con la taza, el nombre,
+    el estado "Ahora" y los canales; contenido a la derecha (~7/12).
+  - Móvil: la columna se reduce a una cabecera compacta y todo va en
+    una sola columna.
+  El contenido de la columna llega por el slot "desk"; el principal,
+  por el slot por defecto.
+*/
+import BaseLayout from "./BaseLayout.astro";
+
+type Props = import("astro/types").ComponentProps<typeof BaseLayout>;
+const props = Astro.props;
+---
+
+<BaseLayout {...props}>
+  <slot name="head" slot="head" />
+  <div class="desk">
+    <header class="desk__columna">
+      <slot name="desk" />
+    </header>
+    <main id="contenido" class="desk__contenido" tabindex="-1">
+      <slot />
+    </main>
+  </div>
+</BaseLayout>
+
+<style>
+  .desk {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-block-size: 100dvb;
+  }
+
+  .desk__columna {
+    padding: var(--espacio-4);
+    border-block-end: var(--borde);
+  }
+
+  .desk__contenido {
+    padding: var(--espacio-8) var(--espacio-4) var(--espacio-16);
+    min-inline-size: 0; /* evita que URLs largas desborden la columna */
+  }
+  .desk__contenido:focus {
+    outline: none;
+  }
+
+  @media (min-width: 64rem) {
+    .desk {
+      grid-template-columns: 5fr 7fr;
+    }
+    .desk__columna {
+      position: sticky;
+      inset-block-start: 0;
+      block-size: 100dvb;
+      overflow-y: auto;
+      padding: var(--espacio-12);
+      border-block-end: 0;
+      border-inline-end: var(--borde);
+    }
+    .desk__contenido {
+      padding: var(--espacio-16) var(--espacio-12);
+    }
+  }
+</style>

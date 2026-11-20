@@ -1,0 +1,129 @@
+/*
+  Estilos base: el orden de las capas decide quién gana.
+  reset < tokens < base < components < utilities
+*/
+@layer reset, tokens, base, components, utilities;
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  * {
+    margin: 0;
+  }
+  img,
+  svg,
+  video {
+    display: block;
+    max-inline-size: 100%;
+    block-size: auto;
+  }
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+  }
+}
+
+@layer base {
+  :root {
+    /* El sitio es oscuro: el navegador pinta scrollbars y controles a juego. */
+    color-scheme: dark;
+    accent-color: var(--naranja);
+    scrollbar-color: var(--crema-apagada) var(--carbon);
+  }
+
+  html {
+    -webkit-text-size-adjust: none;
+    text-size-adjust: none;
+  }
+
+  body {
+    min-block-size: 100dvb;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: var(--fuente-texto);
+    font-size: var(--texto-base);
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--fuente-titulos);
+    font-weight: 700;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+  h1 {
+    font-size: var(--titulo-1);
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    font-size: var(--titulo-2);
+  }
+  h3 {
+    font-size: var(--titulo-3);
+  }
+
+  p {
+    max-inline-size: var(--medida-texto);
+    text-wrap: pretty;
+  }
+
+  a {
+    color: inherit;
+    text-decoration-color: var(--vivo);
+    text-decoration-thickness: 0.12em;
+    text-underline-offset: 0.2em;
+  }
+  a:hover {
+    text-decoration-thickness: 0.2em;
+  }
+
+  /* Monoespaciada solo para código real: hashes, comandos, terminal. */
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--fuente-codigo);
+    font-size: 0.9em;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--foco);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--naranja);
+    color: var(--carbon);
+  }
+
+  /* Pizarra: sección invertida (crema + tinta carbón). Spec 7. */
+  .pizarra {
+    color-scheme: light;
+    --fondo: var(--crema);
+    --superficie: var(--crema-alta);
+    --texto: var(--carbon);
+    --texto-suave: var(--tinta-apagada);
+    --foco: var(--carbon); /* el naranja sobre crema no llega a 3:1 */
+    background: var(--fondo);
+    color: var(--texto);
+  }
+}
+
+@layer utilities {
+  .visually-hidden:not(:focus):not(:active) {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

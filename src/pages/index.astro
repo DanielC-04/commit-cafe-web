@@ -1,0 +1,242 @@
+---
+/*
+  PÁGINA DE PRUEBA DE LA FASE 0.
+  Sirve para comprobar paleta, tipografía, layout y la taza viva antes de
+  construir el inicio real (fase 1). No se indexa en buscadores.
+*/
+import DeskLayout from "../layouts/DeskLayout.astro";
+import TazaViva from "../components/TazaViva.astro";
+
+const colores = [
+  { token: "--carbon", hex: "#1B1D1C", uso: "Fondo" },
+  { token: "--carbon-alto", hex: "#262928", uso: "Superficies" },
+  { token: "--crema", hex: "#F5E8D5", uso: "Texto, símbolo" },
+  { token: "--crema-apagada", hex: "#B8AE9E", uso: "Texto secundario" },
+  { token: "--naranja", hex: "#E8913F", uso: "Solo lo vivo" },
+];
+---
+
+<DeskLayout
+  title="Commit&Cafe"
+  description="El estudio de Commit&Cafe: videos, proyectos y notas sobre desarrollo de software, contados sin tecnicismos."
+  noindex
+>
+  <Fragment slot="desk">
+    <div class="perfil">
+      <TazaViva
+        size={120}
+        label="Logo de Commit&Cafe: una taza con forma de &"
+      />
+      <div>
+        <p class="nombre">
+          Commit<span class="amp">&</span>Cafe
+        </p>
+        <p class="estado">
+          <span class="punto" aria-hidden="true"></span>
+          Ahora: <span class="pendiente">[POR COMPLETAR]</span>
+        </p>
+      </div>
+    </div>
+    <p class="nota">Página de prueba · fase 0</p>
+  </Fragment>
+
+  <h1>Cimientos del estudio</h1>
+  <p class="intro">
+    Esta página existe para revisar la paleta, la tipografía y la maquetación
+    antes de construir el inicio real. El log, los proyectos y lo demás llegan
+    en la fase 1.
+  </p>
+
+  <section aria-labelledby="t-paleta">
+    <h2 id="t-paleta">Paleta</h2>
+    <ul class="paleta" role="list">
+      {colores.map((c) => (
+        <li>
+          <span class={`muestra muestra--${c.token.slice(2)}`} />
+          <code>{c.token}</code>
+          <span class="suave">
+            {c.hex} · {c.uso}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section aria-labelledby="t-titulos">
+    <h2 id="t-titulos">Títulos: Outfit o Nunito</h2>
+    <p class="suave">
+      Elige la que se parezca más al texto del logo. La decisión se anota en
+      <code>docs/decisiones.md</code>.
+    </p>
+    <div class="comparar">
+      <figure>
+        <p class="muestra-titulo fuente-outfit">
+          Commit&Cafe: lo que se rompió y lo que aprendí
+        </p>
+        <figcaption>Outfit</figcaption>
+      </figure>
+      <figure>
+        <p class="muestra-titulo fuente-nunito">
+          Commit&Cafe: lo que se rompió y lo que aprendí
+        </p>
+        <figcaption>Nunito</figcaption>
+      </figure>
+    </div>
+    <img
+      class="logo-ref"
+      src="/brand/horizontal.svg"
+      alt="Logo horizontal de Commit&Cafe, como referencia"
+      width="600"
+      height="200"
+    />
+  </section>
+
+  <section aria-labelledby="t-texto">
+    <h2 id="t-texto">Texto</h2>
+    <p>
+      El texto va en Figtree, una humanista cómoda para leer párrafos largos.
+      Los enlaces llevan <a href="#t-texto">un subrayado naranja</a>, y la
+      monoespaciada se reserva para código real como
+      <code>git commit -m "feat: primer commit"</code> o el hash
+      <code>a1b2c3d</code>.
+    </p>
+  </section>
+
+  <section class="pizarra bloque-pizarra" aria-labelledby="t-pizarra">
+    <h2 id="t-pizarra">Pizarra invertida</h2>
+    <p>
+      En la Pizarra el fondo es crema y la tinta carbón. El naranja solo
+      <span class="subrayado">subraya</span>.
+    </p>
+    <p class="suave">Texto secundario en tinta apagada (6:1).</p>
+    <a href="#t-pizarra">Enlace con foco carbón</a>
+  </section>
+</DeskLayout>
+
+<style>
+  .perfil {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-4);
+  }
+  .nombre {
+    font-family: var(--fuente-titulos);
+    font-weight: 700;
+    font-size: var(--titulo-3);
+  }
+  .amp {
+    color: var(--naranja);
+  }
+  .estado {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-2);
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+  .punto {
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    border-radius: 50%;
+    background: var(--naranja);
+  }
+  .pendiente {
+    color: var(--texto);
+  }
+  .nota {
+    margin-block-start: var(--espacio-6);
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+
+  h1 {
+    margin-block-end: var(--espacio-4);
+  }
+  .intro {
+    font-size: var(--texto-lg);
+    color: var(--texto-suave);
+  }
+  section {
+    margin-block-start: var(--espacio-12);
+  }
+  h2 {
+    margin-block-end: var(--espacio-4);
+  }
+  .suave {
+    color: var(--texto-suave);
+  }
+
+  .paleta {
+    display: grid;
+    gap: var(--espacio-3);
+    padding: 0;
+  }
+  .paleta li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--espacio-3);
+  }
+  .muestra {
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: var(--radio);
+    border: var(--borde);
+  }
+
+  /* Clases en vez de style="": la CSP bloquea estilos en línea. */
+  .muestra--carbon {
+    background: var(--carbon);
+  }
+  .muestra--carbon-alto {
+    background: var(--carbon-alto);
+  }
+  .muestra--crema {
+    background: var(--crema);
+  }
+  .muestra--crema-apagada {
+    background: var(--crema-apagada);
+  }
+  .muestra--naranja {
+    background: var(--naranja);
+  }
+  .fuente-outfit {
+    font-family: var(--font-outfit);
+  }
+  .fuente-nunito {
+    font-family: var(--font-nunito);
+  }
+
+  .comparar {
+    display: grid;
+    gap: var(--espacio-6);
+    margin-block: var(--espacio-6);
+  }
+  .muestra-titulo {
+    font-size: var(--titulo-2);
+    font-weight: 700;
+    line-height: 1.15;
+  }
+  figcaption {
+    margin-block-start: var(--espacio-2);
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+  .logo-ref {
+    inline-size: min(100%, 26rem);
+  }
+
+  .bloque-pizarra {
+    padding: var(--espacio-8);
+    border-radius: var(--radio);
+    display: grid;
+    gap: var(--espacio-4);
+  }
+  .bloque-pizarra a {
+    justify-self: start;
+  }
+  .subrayado {
+    text-decoration: underline var(--naranja) 0.2em;
+    text-underline-offset: 0.15em;
+  }
+</style>

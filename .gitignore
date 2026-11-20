@@ -1,0 +1,16 @@
+# dependencias y build
+node_modules/
+dist/
+.astro/
+
+# secretos: nunca al repo
+.env
+.env.*
+!.env.example
+
+# sistema / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.claude/settings.local.json

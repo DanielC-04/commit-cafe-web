@@ -1,0 +1,31 @@
+{
+  "name": "commit-cafe-web",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@11.1.2",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "brand": "node scripts/brand-assets.mjs"
+  },
+  "dependencies": {
+    "@astrojs/check": "0.9.12",
+    "@astrojs/mdx": "8.1.3",
+    "@astrojs/sitemap": "3.7.4",
+    "astro": "7.4.7",
+    "sharp": "0.35.5",
+    "typescript": "6.0.3"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10",
+    "prettier-plugin-astro": "1.1.2"
+  }
+}

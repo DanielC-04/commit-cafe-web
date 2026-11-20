@@ -1,0 +1,56 @@
+/*
+  Tokens de diseño: los únicos valores "mágicos" del proyecto.
+  Si un color, tamaño o tipografía no está aquí, no se usa.
+  Paleta y contrastes: docs/spec.md, sección 7.
+*/
+@layer tokens {
+  :root {
+    /* Marca (no agregar otros colores) */
+    --carbon: #1b1d1c;
+    --crema: #f5e8d5;
+    --naranja: #e8913f;
+
+    /* Derivados: solo superficies y texto secundario */
+    --carbon-alto: #262928;
+    --crema-apagada: #b8ae9e;
+    --tinta-apagada: #5c5650; /* texto secundario sobre crema (Pizarra) */
+    --crema-alta: #eadbc4; /* superficies sobre crema (Pizarra) */
+
+    /* Roles: los componentes usan estos, no los colores directos.
+       Pizarra (.pizarra) los redefine para invertir la sección. */
+    --fondo: var(--carbon);
+    --superficie: var(--carbon-alto);
+    --texto: var(--crema);
+    --texto-suave: var(--crema-apagada);
+    --vivo: var(--naranja); /* solo lo "vivo": vapor, estado, subrayados */
+    --foco: var(--naranja);
+
+    /* Tipografía. --font-* las crea Astro (astro.config.mjs). */
+    --fuente-titulos: var(--font-outfit);
+    --fuente-texto: var(--font-figtree);
+    --fuente-codigo: var(--font-jetbrains);
+
+    /* Escala tipográfica fluida: crece con la pantalla, con límites. */
+    --texto-sm: 0.875rem;
+    --texto-base: 1.0625rem;
+    --texto-lg: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+    --titulo-3: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+    --titulo-2: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+    --titulo-1: clamp(2.25rem, 1.6rem + 2.6vw, 3.75rem);
+
+    /* Espaciado (múltiplos de 0.25rem) */
+    --espacio-1: 0.25rem;
+    --espacio-2: 0.5rem;
+    --espacio-3: 0.75rem;
+    --espacio-4: 1rem;
+    --espacio-6: 1.5rem;
+    --espacio-8: 2rem;
+    --espacio-12: 3rem;
+    --espacio-16: 4rem;
+
+    --medida-texto: 68ch; /* líneas de menos de 80 caracteres */
+    --radio: 0.5rem;
+    --borde: 1px solid color-mix(in srgb, var(--texto) 14%, transparent);
+    --objetivo-tactil: 44px;
+  }
+}
