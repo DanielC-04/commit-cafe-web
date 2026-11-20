@@ -1,0 +1,10 @@
+"$schema" = "https://open-api.netlify.com/netlify.schema.json"
+
+# Configuración de Netlify. Lo que está aquí manda sobre la interfaz web.
+# El sitio es estático: no necesita adaptador ni funciones.
+[build]
+  command = "pnpm build"
+  publish = "dist"
+
+  [build.environment]
+    NODE_VERSION = "24"

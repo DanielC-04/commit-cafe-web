@@ -14,3 +14,6 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 .claude/settings.local.json
+
+# estado local de Netlify CLI
+.netlify/

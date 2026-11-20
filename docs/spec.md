@@ -34,8 +34,8 @@ El **estudio personal** del creador del canal Commit&Cafe (YouTube, TikTok e Ins
 | Fuentes        | **API de fuentes de Astro** con el proveedor Fontsource (`fontProviders.fontsource()`): descarga en el build y sirve desde nuestro dominio, con _preload_ y fallbacks métricos | Privacidad, rendimiento y CLS bajo                                   |
 | Iconos         | `lucide` (interfaz) + `simple-icons` (YouTube, TikTok, Instagram, GitHub), como SVG en línea                                                                                   | Sin emojis ni librerías pesadas                                      |
 | Búsqueda       | **Pagefind** (fase 4)                                                                                                                                                          | Estática, sin servidor                                               |
-| Hosting        | **Cloudflare** (plan gratuito, sitio estático desplegado desde GitHub)                                                                                                         | Cabeceras con `_headers`, analítica y Turnstile en el mismo sitio    |
-| Analítica      | **Cloudflare Web Analytics**                                                                                                                                                   | Sin cookies, gratis, mismo proveedor                                 |
+| Hosting        | **Netlify** (plan gratuito, sitio estático desplegado desde GitHub; _Deploy Preview_ por cada PR)                                                                              | Lee `_headers`, tiene Netlify Forms y vistas previas por PR          |
+| Analítica      | **[POR DECIDIR en la fase 1]**: Umami Cloud (gratis, sin cookies) o Netlify Analytics (del lado del servidor, de pago)                                                         | Sin cookies                                                          |
 | Gestor         | **`pnpm`** (versión fijada en `packageManager`), Node LTS actual (≥ 22.12)                                                                                                     | Lockfile obligatorio; `minimumReleaseAge` aplica la regla de 14 días |
 | Calidad        | `astro check` (tipos y esquemas) + **Prettier** con `prettier-plugin-astro`                                                                                                    | Suficiente para un sitio de contenido; sin ESLint por ahora          |
 
@@ -134,9 +134,9 @@ En Pizarra el **anillo de foco es carbón**, no naranja (WCAG 2.2 pide ≥ 3:1 p
 
 - **Sitio estático:** no hay servidor propio ni base de datos que proteger. Mantenlo así el mayor tiempo posible.
 - **Cabeceras** (`public/_headers`): `Strict-Transport-Security`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` mínima y una CSP base (`default-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'`).
-- **CSP de scripts y estilos:** Astro mete scripts y estilos _inline_, que una CSP estricta bloquearía. Se activa `security.csp` de Astro, que calcula **hashes** de cada uno y los pone en una `<meta>` por página. Consecuencias: nada de `<ClientRouter />` (usar View Transitions nativas del navegador) ni Shiki (usar `<Prism />` si se resalta código); solo se prueba con `build` + `preview`, no en `dev`. Orígenes externos permitidos solo cuando se usen: `https://www.youtube-nocookie.com` (frame), `https://i.ytimg.com` (img), `https://static.cloudflareinsights.com` y `https://cloudflareinsights.com` (analítica).
+- **CSP de scripts y estilos:** Astro mete scripts y estilos _inline_, que una CSP estricta bloquearía. Se activa `security.csp` de Astro, que calcula **hashes** de cada uno y los pone en una `<meta>` por página. Consecuencias: nada de `<ClientRouter />` (usar View Transitions nativas del navegador) ni Shiki (usar `<Prism />` si se resalta código); solo se prueba con `build` + `preview`, no en `dev`. Orígenes externos permitidos solo cuando se usen: `https://www.youtube-nocookie.com` (frame), `https://i.ytimg.com` (img), el de la analítica que se elija.
 - **Videos:** incrustar con `youtube-nocookie.com` y un _facade_ (miniatura que carga el reproductor al hacer clic). No cargar scripts de terceros por defecto.
-- **Formulario de contacto:** en las fases 1–3 solo `mailto:` (el sitio no tiene servidor). Si en la fase 4 se quiere formulario, usar una función de Cloudflare con validación en servidor, _honeypot_ y Turnstile; nunca exponer claves en el cliente.
+- **Formulario de contacto:** en las fases 1–3 solo `mailto:` (el sitio no tiene servidor). Si en la fase 4 se quiere formulario, usar **Netlify Forms** (sin código de servidor propio) con _honeypot_ y reCAPTCHA de Netlify, o una función de Netlify con validación en servidor; nunca exponer claves en el cliente.
 - **Dependencias:** lockfile versionado, `pnpm install --frozen-lockfile` en CI, Dependabot, `pnpm audit` en cada PR, versiones exactas (sin `^`). La regla de 14 días la aplica pnpm con `minimumReleaseAge: 20160` en `pnpm-workspace.yaml`; solo `sharp` y `esbuild` pueden ejecutar scripts de instalación (`allowBuilds`).
 - **Repositorio:** 2FA en GitHub, protección de la rama `main`, **ningún secreto en el código** (usar variables de entorno del hosting), `.env` en `.gitignore`.
 - **Privacidad:** analítica sin cookies, sin rastreadores publicitarios, página de privacidad breve y honesta. Revisar la normativa local aplicable.
@@ -178,7 +178,7 @@ Cada fase termina con: build limpio, Lighthouse sin regresión, revisión a 1440
 
 ## 13. Datos que debe aportar la persona
 
-**Para la fase 0:** cuenta de Cloudflare y repositorio en GitHub · boceto · elección Outfit vs Nunito (en la página de prueba).
+**Para la fase 0:** cuenta de Netlify (hecha) y repositorio en GitHub (hecho) · boceto · elección Outfit vs Nunito (en la página de prueba).
 
 **Para la fase 1:** dominio elegido · handle único para las redes (`@commitandcafe`, `@commitcafe` o `@commit.cafe`) · enlaces de los canales y de GitHub · **`channel_id` de YouTube** · correo de contacto · primer proyecto que se publicará.
 
@@ -197,7 +197,7 @@ Cada fase termina con: build limpio, Lighthouse sin regresión, revisión a 1440
 
 ## 15. Cambios de la v1.1 (2026-11-20)
 
-- Stack: Astro 7, TypeScript 6 (la 7 aún no la soporta `astro check`), fuentes con la API de Astro, hosting y analítica en Cloudflare, `pnpm` fijo, Prettier + `astro check` como "lint".
+- Stack: Astro 7, TypeScript 6 (la 7 aún no la soporta `astro check`), fuentes con la API de Astro, hosting en Netlify (cambiado desde Cloudflare tras la v1.1), `pnpm` fijo, Prettier + `astro check` como "lint".
 - Contenido: el `log` pasa a **calcularse** desde las colecciones (antes duplicaba datos); nueva colección `posts` para TikTok/Instagram/notas; nueva colección `breaks` para `/roturas`; YouTube como colección `videos` con loader propio; `story` usa `publishedAt`; el slug sale del nombre del archivo.
 - Rutas: filtros del log como rutas estáticas; nueva `/privacidad`; contacto solo con `mailto:` hasta la fase 4.
 - Diseño: contrastes medidos; tokens propios para Pizarra (`--tinta-apagada`, `--crema-alta`) y foco carbón sobre crema; tipografía de títulos a elegir entre Outfit y Nunito.
