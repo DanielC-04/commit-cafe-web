@@ -5,9 +5,9 @@ import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 
 // La URL pública del sitio. Se usa para las URLs canónicas, el sitemap y
-// Open Graph. Mientras no haya dominio, se define en el hosting con la
-// variable de entorno SITE_URL (ver docs/decisiones.md).
-const site = process.env.SITE_URL ?? "http://localhost:4321";
+// Open Graph. Orden: SITE_URL (si la defines), luego URL (Netlify la pone
+// sola en cada build con el dominio principal) y, en local, localhost.
+const site = process.env.SITE_URL ?? process.env.URL ?? "http://localhost:4321";
 
 export default defineConfig({
   site,
