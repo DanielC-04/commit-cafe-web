@@ -26,7 +26,7 @@ pnpm brand            # regenera favicon, apple-touch-icon y og-default
 - **Contenido:** nunca inventes datos. Usa `[POR COMPLETAR]` visible.
 - **Dependencias:** no añadas paquetes sin justificarlo a la persona. pnpm rechaza versiones de menos de 14 días (`pnpm-workspace.yaml`); no lo desactives. Versiones exactas, sin `^`.
 - **Interfaz:** antes de escribir HTML/CSS/JS de cliente, consulta la skill `modern-web-guidance` (`.claude/skills/`).
-- **Git:** Conventional Commits (`feat:`, `fix:`, `docs:`), una rama por funcionalidad. Si algo se rompe, anótalo: es material para el devlog.
+- **Git:** ramas `feature/…` desde `develop` y PR hacia `develop` (squash). A `main` (producción, gasta créditos de Netlify) solo llega un PR `develop → main` con varias mejoras, fusionado con merge commit. Nunca push directo a `main` ni `develop`. Detalle en [`docs/flujo-de-trabajo.md`](docs/flujo-de-trabajo.md). Conventional Commits (`feat:`, `fix:`, `docs:`). Si algo se rompe, anótalo: es material para el devlog.
 
 ## Navegadores
 

@@ -2,6 +2,13 @@
 
 Registro corto de decisiones y su porqué. La más nueva va arriba.
 
+## 2026-11-20 · Rama develop y despliegues por lotes
+
+- **Solo producción gasta créditos** en Netlify (15 por despliegue; 300 al mes en el plan gratuito). Vistas previas y despliegues de rama son gratis.
+- **`develop` es la rama por defecto** y de integración; `main` es producción y solo recibe PRs `develop → main` con varias mejoras. Detalle en `docs/flujo-de-trabajo.md`.
+- **Repositorio público.** Con repo privado, el plan gratuito de Netlify bloqueaba las vistas previas ("Unrecognized Git contributor") aunque la cuenta de GitHub estuviera vinculada. Hacerlo público lo resolvió y encaja con el "build in public" del canal.
+- **Merge commit habilitado** solo para los PRs `develop → main`, para que ambas ramas compartan historial.
+
 ## 2026-11-20 · Hosting en Netlify
 
 - **Netlify en vez de Cloudflare.** Decisión de la persona. Netlify lee el mismo `public/_headers`, crea un _Deploy Preview_ por cada PR (con `noindex` automático) y ofrece Netlify Forms para un futuro formulario sin servidor propio.

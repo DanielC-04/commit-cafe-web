@@ -1,10 +1,10 @@
-# CI: en cada PR y en cada push a main, comprueba que el sitio compila,
+# CI: en cada PR y en cada push a main o develop, comprueba que el sitio compila,
 # que el formato es correcto y que no hay vulnerabilidades conocidas.
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
 
 permissions:
