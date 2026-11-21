@@ -17,3 +17,6 @@ Thumbs.db
 
 # estado local de Netlify CLI
 .netlify/
+
+# grafo local de graphify (se regenera con /graphify)
+graphify-out/
