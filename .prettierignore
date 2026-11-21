@@ -2,3 +2,7 @@ pnpm-lock.yaml
 public/brand/*.svg
 dist
 .astro
+
+# Contenido: lo escribe el panel (Pages CMS) con su propio formato.
+# Astro valida los datos en el build; Prettier no debe bloquearlo.
+src/content/
