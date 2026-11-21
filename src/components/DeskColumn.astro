@@ -7,7 +7,8 @@
 import { getCollection, getEntry } from "astro:content";
 import EstudioIlustracion, { type Foco } from "./EstudioIlustracion.astro";
 import { getSections } from "../lib/sections";
-import { isPublished } from "../lib/log";
+import { isPublished, getLog } from "../lib/log";
+import type { DatosEscena } from "../scripts/estudio/tipos";
 import { SITE, POR_COMPLETAR, type SocialKey } from "../site";
 
 interface Props {
@@ -19,12 +20,31 @@ interface Props {
 
 const { home = false, foco = "general", tazaVolcada = false } = Astro.props;
 
-const [sections, now, projects, breaks] = await Promise.all([
+const [sections, now, projects, breaks, log] = await Promise.all([
   getSections(),
   getEntry("now", "estudio"),
   getCollection("projects", isPublished),
   getCollection("breaks", isPublished),
+  getLog(),
 ]);
+
+/*
+  Datos para la escena 3D (fase 1b). Viajan en un atributo data-* (no en un
+  <script> en línea) para no chocar con la CSP. Solo enlaza objetos cuya
+  sección existe (puerta de contenido).
+*/
+const enlaces = Object.fromEntries(
+  sections.filter((s) => s.objeto !== "general").map((s) => [s.objeto, s.href]),
+);
+const datosEscena: DatosEscena = {
+  foco,
+  tazaVolcada,
+  proyectos: projects.length,
+  roturas: breaks.length > 0,
+  ahora: now?.data.building ?? POR_COMPLETAR,
+  entradas: log.slice(0, 4).map((e) => ({ hash: e.hash, title: e.title })),
+  enlaces,
+};
 
 const path = Astro.url.pathname
   .replace(/(index)?\.html$/, "")
@@ -44,13 +64,20 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
 ---
 
 <div class="columna">
-  <a href="/" class="estudio-enlace" aria-label="Inicio de Commit&Cafe">
-    <EstudioIlustracion
-      foco={foco}
-      proyectos={projects.length}
-      roturas={breaks.length > 0}
-      tazaVolcada={tazaVolcada}
-    />
+  <a
+    href="/"
+    class="estudio-enlace"
+    aria-label="Inicio de Commit&Cafe"
+    data-escena={JSON.stringify(datosEscena)}
+  >
+    <span class="estudio-marco">
+      <EstudioIlustracion
+        foco={foco}
+        proyectos={projects.length}
+        roturas={breaks.length > 0}
+        tazaVolcada={tazaVolcada}
+      />
+    </span>
   </a>
 
   <div class="identidad">
@@ -91,6 +118,7 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
         <li>
           <a
             href={s.href}
+            data-objeto={s.objeto}
             aria-current={isCurrent(s.href) ? "page" : undefined}
           >
             {s.label}
@@ -137,11 +165,35 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
     min-block-size: 0;
     border-radius: var(--radio);
   }
-  .estudio-enlace :global(.estudio) {
+  /* El marco define el tamaño del estudio; la ilustración y (si hay 3D)
+     el canvas lo llenan exactamente, así cambiar de uno a otro no mueve nada. */
+  .estudio-marco {
+    position: relative;
+    display: block;
     block-size: 100%;
     max-block-size: 24rem;
-    inline-size: auto;
+    aspect-ratio: 4 / 3;
     max-inline-size: 100%;
+    border-radius: var(--radio);
+    overflow: clip;
+  }
+  .estudio-marco :global(.estudio) {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+  .estudio-marco :global(canvas) {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .estudio-marco:global(.con-3d) :global(canvas) {
+    opacity: 1;
+  }
+  .estudio-marco:global(.con-3d) :global(.estudio) {
+    visibility: hidden;
   }
 
   .nombre {
@@ -237,7 +289,7 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
       gap: var(--espacio-4);
       block-size: auto;
     }
-    .estudio-enlace :global(.estudio) {
+    .estudio-marco {
       inline-size: 100%;
       block-size: auto;
     }
@@ -258,3 +310,9 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
     }
   }
 </style>
+
+<script>
+  // Fase 1b: intenta montar la escena 3D. Este archivo es muy pequeño; Three.js
+  // solo se descarga si el navegador cumple las condiciones (ver montar.ts).
+  import "../scripts/estudio/montar";
+</script>

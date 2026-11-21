@@ -7,9 +7,13 @@
 import { getCollection } from "astro:content";
 import { isPublished, getLog } from "./log";
 
+/** Objeto del estudio que representa cada sección (spec 7.1). */
+export type Objeto = "monitor" | "estante" | "caja" | "taza" | "general";
+
 export interface Section {
   href: string;
   label: string;
+  objeto: Objeto;
 }
 
 /** Secciones visibles en la navegación, en orden. */
@@ -21,11 +25,14 @@ export async function getSections(): Promise<Section[]> {
   ]);
 
   const sections: Section[] = [];
-  if (log.length > 0) sections.push({ href: "/log", label: "Log" });
-  if (projects.length > 0) sections.push({ href: "/taller", label: "Taller" });
-  if (breaks.length > 0) sections.push({ href: "/roturas", label: "Roturas" });
+  if (log.length > 0)
+    sections.push({ href: "/log", label: "Log", objeto: "monitor" });
+  if (projects.length > 0)
+    sections.push({ href: "/taller", label: "Taller", objeto: "estante" });
+  if (breaks.length > 0)
+    sections.push({ href: "/roturas", label: "Roturas", objeto: "caja" });
   // Estas dos siempre existen: no dependen de contenido.
-  sections.push({ href: "/estudio", label: "Estudio" });
-  sections.push({ href: "/contacto", label: "Contacto" });
+  sections.push({ href: "/estudio", label: "Estudio", objeto: "general" });
+  sections.push({ href: "/contacto", label: "Contacto", objeto: "taza" });
   return sections;
 }
