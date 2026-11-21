@@ -1,0 +1,42 @@
+---
+/* Enlaces "más nuevas / más antiguas" de una lista paginada. */
+import type { Page } from "astro";
+
+interface Props {
+  page: Page<unknown>;
+}
+
+const { page } = Astro.props;
+---
+
+{page.lastPage > 1 && (
+  <nav aria-label="Páginas" class="paginas">
+    {page.url.prev ? <a href={page.url.prev}>Más nuevas</a> : <span />}
+    <span class="actual">
+      Página {page.currentPage} de {page.lastPage}
+    </span>
+    {page.url.next ? <a href={page.url.next}>Más antiguas</a> : <span />}
+  </nav>
+)}
+
+<style>
+  .paginas {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--espacio-4);
+    margin-block-start: var(--espacio-8);
+    padding-block-start: var(--espacio-6);
+    border-block-start: 1px solid var(--superficie);
+  }
+  .paginas a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--objetivo-tactil);
+    font-weight: 500;
+  }
+  .actual {
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+</style>

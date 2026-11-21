@@ -1,0 +1,226 @@
+---
+/*
+  Página de proyecto (boceto-web.html, "Página de proyecto").
+  El relato viene del cuerpo MDX (Por qué lo hice / Qué se rompió /
+  Qué aprendí); el devlog del proyecto va debajo.
+*/
+import type { GetStaticPaths } from "astro";
+import { getCollection, render } from "astro:content";
+import DeskLayout from "../../layouts/DeskLayout.astro";
+import { isPublished, shortHash } from "../../lib/log";
+import { STATUS_LABELS, formatDate, isoDate } from "../../lib/format";
+import { SITE } from "../../site";
+
+export const getStaticPaths = (async () => {
+  const [projects, devlog] = await Promise.all([
+    getCollection("projects", isPublished),
+    getCollection("devlog", isPublished),
+  ]);
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: {
+      project,
+      devlog: devlog
+        .filter((d) => d.data.project.id === project.id)
+        .sort(
+          (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+        ),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { project, devlog } = Astro.props;
+const { data } = project;
+const { Content } = await render(project);
+const entradas = await Promise.all(
+  devlog.map(async (d) => ({ entry: d, Content: (await render(d)).Content })),
+);
+
+const enlaces = [
+  { label: "Repositorio", href: data.links.repo },
+  data.links.demo && { label: "Demo", href: data.links.demo },
+  data.links.video && { label: "Video", href: data.links.video },
+].filter(Boolean) as { label: string; href: string }[];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  name: data.title,
+  description: data.tagline,
+  codeRepository: data.links.repo,
+  dateCreated: isoDate(data.startedAt),
+  datePublished: isoDate(data.publishedAt),
+  programmingLanguage: data.stack,
+  inLanguage: SITE.locale,
+  ...(SITE.author && { author: { "@type": "Person", name: SITE.author } }),
+};
+---
+
+<DeskLayout
+  title={data.title}
+  description={data.tagline}
+  foco="estante"
+  jsonLd={jsonLd}
+>
+  <a href="/taller" class="volver">
+    Volver al taller
+  </a>
+
+  <p class="estado">
+    <span
+      class:list={["punto", { "punto--vivo": data.status === "building" }]}
+      aria-hidden="true"
+    ></span>
+    {STATUS_LABELS[data.status]}
+  </p>
+  <h1>{data.title}</h1>
+  <p class="frase">{data.tagline}</p>
+
+  <ul class="enlaces" role="list">
+    {enlaces.map((e) => (
+      <li>
+        <a href={e.href} class="boton" rel="noopener">
+          {e.label}
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <p class="meta">
+    Empezó el{" "}
+    <time datetime={isoDate(data.startedAt)}>{formatDate(data.startedAt)}</time>
+    .
+    {data.stack.length > 0 && (
+      <>
+        Stack: <code>{data.stack.join(", ")}</code>
+      </>
+    )}
+  </p>
+
+  <div class="relato">
+    <Content />
+  </div>
+
+  {entradas.length > 0 && (
+    <section class="devlog">
+      <h2>Devlog</h2>
+      <ol class="devlog__lista" role="list">
+        {entradas.map(({ entry, Content: Cuerpo }) => (
+          <li id={entry.id} class="devlog__entrada">
+            <code class="hash">{shortHash(`devlog/${entry.id}`)}</code>
+            <div>
+              <h3>{entry.data.title}</h3>
+              <time datetime={isoDate(entry.data.publishedAt)}>
+                {formatDate(entry.data.publishedAt)}
+              </time>
+              <div class="devlog__cuerpo">
+                <Cuerpo />
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
+</DeskLayout>
+
+<style>
+  .volver {
+    font-weight: 500;
+  }
+  .estado {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-2);
+    margin-block: var(--espacio-8) var(--espacio-3);
+    color: var(--texto-suave);
+    font-weight: 500;
+  }
+  .punto {
+    inline-size: 0.55rem;
+    block-size: 0.55rem;
+    border-radius: 50%;
+    background: var(--crema-apagada);
+  }
+  .punto--vivo {
+    background: var(--naranja);
+  }
+  .frase {
+    margin-block: var(--espacio-3) var(--espacio-6);
+    color: var(--texto-suave);
+    font-size: var(--texto-lg);
+    max-inline-size: 48ch;
+  }
+  .enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacio-3);
+    padding: 0;
+    list-style: none;
+  }
+  .boton {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--objetivo-tactil);
+    padding-inline: var(--espacio-5);
+    border: 1px solid var(--crema);
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .boton:hover {
+    border-color: var(--naranja);
+    color: var(--naranja);
+  }
+  .meta {
+    margin-block-start: var(--espacio-4);
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+
+  .relato {
+    margin-block-start: var(--espacio-8);
+  }
+  .relato :global(h2) {
+    margin-block: var(--espacio-12) var(--espacio-3);
+  }
+  .relato :global(p) {
+    font-size: 1.125rem;
+    line-height: 1.65;
+    max-inline-size: 62ch;
+  }
+  .relato :global(p + p) {
+    margin-block-start: var(--espacio-4);
+  }
+
+  .devlog {
+    margin-block-start: var(--espacio-16);
+  }
+  .devlog h2 {
+    margin-block-end: var(--espacio-4);
+  }
+  .devlog__lista {
+    padding: 0;
+    list-style: none;
+  }
+  .devlog__entrada {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: var(--espacio-6);
+    padding-block: var(--espacio-6);
+    border-block-start: 1px solid var(--superficie);
+    scroll-margin-block-start: var(--espacio-8);
+  }
+  .devlog__entrada:target h3 {
+    text-decoration: underline var(--naranja) 2px;
+    text-underline-offset: 6px;
+  }
+  .hash,
+  .devlog time {
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+  .devlog__cuerpo {
+    margin-block-start: var(--espacio-2);
+  }
+</style>

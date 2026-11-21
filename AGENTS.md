@@ -22,11 +22,12 @@ pnpm brand            # regenera favicon, apple-touch-icon y og-default
 - **Color:** solo los tokens de `src/styles/tokens.css`. Los componentes usan los roles (`--fondo`, `--texto`, `--vivo`…), no los hex.
 - **Sin estilos ni scripts en línea** (`style="..."`, `onclick`): la CSP los bloquea. Usa clases y `<script>` de Astro.
 - **Sin `<ClientRouter />` ni Shiki** (incompatibles con la CSP). Transiciones con la View Transitions API nativa; código resaltado con `<Prism />`.
+- **El estudio (columna fija):** la habitación (ilustración y, en la fase 1b, escena 3D) es decorativa y `aria-hidden`; la navegación real son enlaces HTML. El contenido nunca va dentro del 3D (spec 7.1).
 - **Movimiento:** estático por defecto; las animaciones van dentro de `@media (prefers-reduced-motion: no-preference)`.
 - **Contenido:** nunca inventes datos. Usa `[POR COMPLETAR]` visible.
 - **Dependencias:** no añadas paquetes sin justificarlo a la persona. pnpm rechaza versiones de menos de 14 días (`pnpm-workspace.yaml`); no lo desactives. Versiones exactas, sin `^`.
 - **Interfaz:** antes de escribir HTML/CSS/JS de cliente, consulta la skill `modern-web-guidance` (`.claude/skills/`).
-- **Git:** Conventional Commits (`feat:`, `fix:`, `docs:`), una rama por funcionalidad. Si algo se rompe, anótalo: es material para el devlog.
+- **Git:** ramas `feature/…` desde `develop` y PR hacia `develop` (squash). A `main` (producción, gasta créditos de Netlify) solo llega un PR `develop → main` con varias mejoras, fusionado con merge commit. Nunca push directo a `main` ni `develop`. Detalle en [`docs/flujo-de-trabajo.md`](docs/flujo-de-trabajo.md). Conventional Commits (`feat:`, `fix:`, `docs:`). Si algo se rompe, anótalo: es material para el devlog.
 
 ## Navegadores
 

@@ -1,0 +1,89 @@
+---
+/*
+  /roturas — post-mortems: qué se rompió, por qué y cómo se arregló.
+  Puerta de contenido: sin roturas publicadas, no se genera. (La versión
+  completa llega en la fase 2; esta ya permite publicar la primera.)
+*/
+import type { GetStaticPaths } from "astro";
+import { getCollection, render } from "astro:content";
+import DeskLayout from "../../layouts/DeskLayout.astro";
+import { isPublished, shortHash } from "../../lib/log";
+import { formatDate, isoDate } from "../../lib/format";
+
+export const getStaticPaths = (async () => {
+  const breaks = await getCollection("breaks", isPublished);
+  if (breaks.length === 0) return [];
+  breaks.sort(
+    (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+  );
+  return [{ params: { page: undefined }, props: { breaks } }];
+}) satisfies GetStaticPaths;
+
+const { breaks } = Astro.props;
+const roturas = await Promise.all(
+  breaks.map(async (b) => ({ entry: b, Content: (await render(b)).Content })),
+);
+---
+
+<DeskLayout
+  title="Roturas"
+  description="Lo que se rompió en el estudio, por qué pasó y cómo se arregló."
+  foco="caja"
+>
+  <h1>Roturas</h1>
+  <p class="intro">Lo que se rompió, por qué pasó y cómo se arregló.</p>
+
+  <ol class="lista" role="list">
+    {roturas.map(({ entry, Content }) => (
+      <li id={entry.id} class="rotura">
+        <code class="hash">{shortHash(`breaks/${entry.id}`)}</code>
+        <article>
+          <h2>{entry.data.title}</h2>
+          <p class="meta">
+            {entry.data.severity} ·{" "}
+            <time datetime={isoDate(entry.data.publishedAt)}>
+              {formatDate(entry.data.publishedAt)}
+            </time>
+          </p>
+          <p class="resumen">{entry.data.summary}</p>
+          <div class="cuerpo">
+            <Content />
+          </div>
+        </article>
+      </li>
+    ))}
+  </ol>
+</DeskLayout>
+
+<style>
+  .intro {
+    color: var(--texto-suave);
+    margin-block: var(--espacio-2) var(--espacio-8);
+  }
+  .lista {
+    padding: 0;
+    list-style: none;
+  }
+  .rotura {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: var(--espacio-6);
+    padding-block: var(--espacio-8);
+    border-block-start: 1px solid var(--superficie);
+    scroll-margin-block-start: var(--espacio-8);
+  }
+  .hash,
+  .meta {
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+  .resumen {
+    margin-block: var(--espacio-2) var(--espacio-4);
+    color: var(--texto-suave);
+  }
+  .cuerpo :global(h2),
+  .cuerpo :global(h3) {
+    font-size: var(--titulo-3);
+    margin-block: var(--espacio-6) var(--espacio-2);
+  }
+</style>

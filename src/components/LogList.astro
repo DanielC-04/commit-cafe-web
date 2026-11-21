@@ -1,0 +1,42 @@
+---
+/* Lista de filas del log, con un mensaje honesto si está vacía. */
+import LogRow from "./LogRow.astro";
+import type { LogEntry } from "../lib/log";
+
+interface Props {
+  entries: LogEntry[];
+  level?: 2 | 3;
+  vacio?: string;
+}
+
+const {
+  entries,
+  level = 2,
+  vacio = "Todavía no hay entradas publicadas. El primer commit está en camino.",
+} = Astro.props;
+---
+
+{entries.length > 0 ? (
+  <ul class="log" role="list">
+    {entries.map((entry) => (
+      <LogRow entry={entry} level={level} />
+    ))}
+  </ul>
+) : (
+  <p class="vacio">{vacio}</p>
+)}
+
+<style>
+  .log {
+    padding: 0;
+    list-style: none;
+    /* Con cientos de filas, el navegador solo dibuja las visibles. */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 40rem;
+  }
+  .vacio {
+    padding-block: var(--espacio-8);
+    border-block-start: 1px solid var(--superficie);
+    color: var(--texto-suave);
+  }
+</style>

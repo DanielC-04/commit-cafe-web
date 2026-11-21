@@ -17,6 +17,8 @@ interface Props {
   ogImage?: string;
   /** true para páginas que no deben aparecer en buscadores. */
   noindex?: boolean;
+  /** Datos estructurados (schema.org) para buscadores. */
+  jsonLd?: Record<string, unknown>;
 }
 
 const {
@@ -24,11 +26,15 @@ const {
   description,
   ogImage = "/brand/og-default.png",
   noindex = false,
+  jsonLd,
 } = Astro.props;
 
 const SITE_NAME = "Commit&Cafe";
 const fullTitle = title === SITE_NAME ? title : `${title} · ${SITE_NAME}`;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+// Con build.format "file" Astro ve rutas como /index.html o /estudio.html,
+// pero la URL pública limpia es / o /estudio (Netlify sirve ambas).
+const cleanPath = Astro.url.pathname.replace(/(index)?\.html$/, "");
+const canonical = new URL(cleanPath, Astro.site);
 const ogUrl = new URL(ogImage, Astro.site);
 ---
 
@@ -44,6 +50,13 @@ const ogUrl = new URL(ogImage, Astro.site);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex" />}
+    {jsonLd && (
+      <script
+        type="application/ld+json"
+        is:inline
+        set:html={JSON.stringify(jsonLd)}
+      />
+    )}
 
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/brand/icono.svg" type="image/svg+xml" />
@@ -64,7 +77,6 @@ const ogUrl = new URL(ogImage, Astro.site);
     <!-- Solo se precargan las fuentes que se ven al abrir la página. -->
     <Font cssVariable="--font-outfit" preload />
     <Font cssVariable="--font-figtree" preload />
-    <Font cssVariable="--font-nunito" />
     <Font cssVariable="--font-jetbrains" />
 
     <slot name="head" />

@@ -39,6 +39,9 @@
   html {
     -webkit-text-size-adjust: none;
     text-size-adjust: none;
+    /* Reserva siempre el hueco de la barra de scroll: así el ancho no
+       cambia entre páginas cortas (sin barra) y largas (con barra). */
+    scrollbar-gutter: stable;
   }
 
   body {
@@ -114,6 +117,39 @@
     --foco: var(--carbon); /* el naranja sobre crema no llega a 3:1 */
     background: var(--fondo);
     color: var(--texto);
+  }
+}
+
+@layer components {
+  /* Texto largo (Estudio, Privacidad, relatos): ritmo vertical cómodo. */
+  .prosa > * + * {
+    margin-block-start: var(--espacio-4);
+  }
+  .prosa h2 {
+    margin-block-start: var(--espacio-12);
+  }
+  .prosa h3 {
+    margin-block-start: var(--espacio-8);
+  }
+  .prosa p,
+  .prosa li {
+    font-size: 1.125rem;
+    line-height: 1.65;
+    max-inline-size: 62ch;
+  }
+  .prosa ul {
+    padding-inline-start: var(--espacio-6);
+  }
+  .pendiente {
+    color: var(--texto-suave);
+  }
+}
+
+/* Transiciones entre páginas (View Transitions nativas, sin JS). La
+   columna del estudio tiene nombre propio y se queda quieta. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
   }
 }
 

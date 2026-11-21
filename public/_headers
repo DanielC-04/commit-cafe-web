@@ -1,4 +1,4 @@
-# Cabeceras de seguridad (Cloudflare las lee de este archivo).
+# Cabeceras de seguridad (Netlify las lee de este archivo).
 # La CSP de scripts y estilos la pone Astro en cada página con hashes
 # (security.csp en astro.config.mjs). Aquí va la parte que una <meta>
 # no puede expresar, como frame-ancestors. Si se añade un origen externo

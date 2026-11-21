@@ -1,0 +1,63 @@
+---
+/* /notas/<id> — notas escritas en el propio sitio (posts con platform "web"). */
+import type { GetStaticPaths } from "astro";
+import { getCollection, render } from "astro:content";
+import DeskLayout from "../../layouts/DeskLayout.astro";
+import { isPublished } from "../../lib/log";
+import { formatDate, isoDate } from "../../lib/format";
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection(
+    "posts",
+    (p) => isPublished(p) && p.data.platform === "web",
+  );
+  return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}) satisfies GetStaticPaths;
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<DeskLayout
+  title={post.data.title}
+  description={post.data.summary}
+  foco="monitor"
+>
+  <a href="/log" class="volver">
+    Volver al log
+  </a>
+  <article>
+    <h1>{post.data.title}</h1>
+    <p class="meta">
+      Nota ·{" "}
+      <time datetime={isoDate(post.data.publishedAt)}>
+        {formatDate(post.data.publishedAt)}
+      </time>
+    </p>
+    <div class="cuerpo">
+      <Content />
+    </div>
+  </article>
+</DeskLayout>
+
+<style>
+  .volver {
+    font-weight: 500;
+  }
+  article h1 {
+    margin-block-start: var(--espacio-8);
+  }
+  .meta {
+    margin-block: var(--espacio-2) var(--espacio-8);
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+  .cuerpo :global(p) {
+    font-size: 1.125rem;
+    line-height: 1.65;
+  }
+  .cuerpo :global(p + p),
+  .cuerpo :global(h2) {
+    margin-block-start: var(--espacio-6);
+  }
+</style>

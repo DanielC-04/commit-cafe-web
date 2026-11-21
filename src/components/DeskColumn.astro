@@ -1,0 +1,354 @@
+---
+/*
+  Columna fija de la "mesa de trabajo" (boceto-web.html, <aside>).
+  Contiene: el estudio, el nombre, la frase (solo en inicio), el estado
+  "Ahora", la navegación por secciones y los canales.
+*/
+import { getCollection, getEntry } from "astro:content";
+import { getImage } from "astro:assets";
+import EstudioIlustracion, { type Foco } from "./EstudioIlustracion.astro";
+import { getSections } from "../lib/sections";
+import { isPublished, getLog } from "../lib/log";
+import type { DatosEscena } from "../scripts/estudio/tipos";
+import { SITE, POR_COMPLETAR, type SocialKey } from "../site";
+
+interface Props {
+  /** En el inicio el nombre es el <h1> y se muestra la frase. */
+  home?: boolean;
+  foco?: Foco;
+  tazaVolcada?: boolean;
+}
+
+const { home = false, foco = "general", tazaVolcada = false } = Astro.props;
+
+const [sections, now, projects, breaks, log] = await Promise.all([
+  getSections(),
+  getEntry("now", "estudio"),
+  getCollection("projects", isPublished),
+  getCollection("breaks", isPublished),
+  getLog(),
+]);
+
+/*
+  Datos para la escena 3D (fase 1b). Viajan en un atributo data-* (no en un
+  <script> en línea) para no chocar con la CSP. Solo enlaza objetos cuya
+  sección existe (puerta de contenido).
+*/
+const enlaces = Object.fromEntries(
+  sections.filter((s) => s.objeto !== "general").map((s) => [s.objeto, s.href]),
+);
+/*
+  Último video: la miniatura se descarga y optimiza en el build y se sirve
+  desde nuestro dominio (sin CSP extra ni conexiones a Google al visitar).
+  Si el build no puede descargarla, el monitor simplemente no la muestra.
+*/
+let video: DatosEscena["video"];
+const ultimoVideo = log.find((e) => e.platform === "youtube");
+if (ultimoVideo) {
+  const id = ultimoVideo.key.split("/")[1];
+  try {
+    const img = await getImage({
+      src: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
+      width: 448,
+      height: 252,
+      format: "webp",
+    });
+    video = { img: img.src, url: ultimoVideo.url, title: ultimoVideo.title };
+  } catch {
+    video = undefined;
+  }
+}
+
+const datosEscena: DatosEscena = {
+  foco,
+  tazaVolcada,
+  proyectos: projects.length,
+  roturas: breaks.length > 0,
+  ahora: now?.data.building ?? POR_COMPLETAR,
+  entradas: log.slice(0, 4).map((e) => ({ hash: e.hash, title: e.title })),
+  enlaces,
+  video,
+};
+
+const path = Astro.url.pathname
+  .replace(/(index)?\.html$/, "")
+  .replace(/\/$/, "");
+const isCurrent = (href: string) =>
+  path === href || path.startsWith(`${href}/`);
+
+const SOCIAL_LABELS: Record<SocialKey, string> = {
+  youtube: "YouTube",
+  tiktok: "TikTok",
+  instagram: "Instagram",
+  github: "GitHub",
+};
+const canales = (Object.keys(SITE.social) as SocialKey[])
+  .filter((k) => SITE.social[k])
+  .map((k) => ({ label: SOCIAL_LABELS[k], href: SITE.social[k]! }));
+---
+
+<div class="columna">
+  <a
+    href="/"
+    class="estudio-enlace"
+    aria-label="Inicio de Commit&Cafe"
+    data-escena={JSON.stringify(datosEscena)}
+  >
+    <span class="estudio-marco">
+      <EstudioIlustracion
+        foco={foco}
+        proyectos={projects.length}
+        roturas={breaks.length > 0}
+        tazaVolcada={tazaVolcada}
+      />
+    </span>
+  </a>
+
+  <div class="identidad">
+    {/* Mismo aspecto en todas las páginas: solo cambia la etiqueta (en el
+        inicio es el <h1>), así la columna nunca cambia de tamaño. */}
+    {home ? (
+      <h1 class="nombre">
+        Commit<span class="amp">&</span>Cafe
+      </h1>
+    ) : (
+      <p class="nombre">
+        <a href="/">
+          Commit<span class="amp">&</span>Cafe
+        </a>
+      </p>
+    )}
+    <p class="frase">{SITE.description}</p>
+  </div>
+
+  <div class="ahora">
+    <p class="ahora__titulo">
+      <span class="punto" aria-hidden="true"></span>
+      Ahora
+    </p>
+    <p>
+      Construyendo:{" "}
+      <span class="valor">{now?.data.building ?? POR_COMPLETAR}</span>
+    </p>
+    <p>
+      Último commit:{" "}
+      <span class="valor">{now?.data.lastCommit ?? POR_COMPLETAR}</span>
+    </p>
+  </div>
+
+  <div class="menu">
+    <nav aria-label="Secciones" class="secciones">
+      <ul role="list">
+        {sections.map((s) => (
+          <li>
+            <a
+              href={s.href}
+              data-objeto={s.objeto}
+              aria-current={isCurrent(s.href) ? "page" : undefined}
+            >
+              {s.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    {canales.length > 0 && (
+      <nav aria-label="Canales" class="canales">
+        <ul role="list">
+          {canales.map((c) => (
+            <li>
+              <a href={c.href} rel="me noopener" target="_blank">
+                {c.label}
+                <span class="visually-hidden"> (se abre en otra pestaña)</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+  </div>
+</div>
+
+<style>
+  /*
+    Escritorio: la columna ocupa exactamente el alto de la pantalla. Todo
+    tiene su tamaño natural salvo el estudio, que se encoge o crece para
+    llenar lo que sobra (fila minmax(0, 1fr)). Así nunca aparece scroll y
+    la columna es idéntica en todas las páginas.
+  */
+  .columna {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) repeat(3, auto);
+    /* Una sola columna que nunca crece más que el espacio disponible. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-4);
+    block-size: 100%;
+  }
+
+  .estudio-enlace {
+    display: flex;
+    /* En pantallas altas, el estudio se pega al nombre (el aire va arriba). */
+    align-items: flex-end;
+    min-block-size: 0;
+    border-radius: var(--radio);
+  }
+  /* El marco define el tamaño del estudio; la ilustración y (si hay 3D)
+     el canvas lo llenan exactamente, así cambiar de uno a otro no mueve nada. */
+  .estudio-marco {
+    position: relative;
+    display: block;
+    block-size: 100%;
+    max-block-size: 30rem;
+    aspect-ratio: 4 / 3;
+    max-inline-size: 100%;
+    border-radius: var(--radio);
+    overflow: clip;
+  }
+  .estudio-marco :global(.estudio) {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+  .estudio-marco :global(canvas) {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .estudio-marco:global(.con-3d) :global(canvas) {
+    opacity: 1;
+  }
+  .estudio-marco:global(.con-3d) :global(.estudio) {
+    visibility: hidden;
+  }
+
+  .nombre {
+    font-family: var(--fuente-titulos);
+    font-weight: 700;
+    font-size: clamp(2rem, 1.4rem + 1.4vw, 3rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .nombre a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .amp {
+    color: var(--naranja);
+  }
+  .frase {
+    margin-block-start: var(--espacio-4);
+    color: var(--texto-suave);
+    font-size: var(--texto-base);
+    max-inline-size: 46ch;
+  }
+
+  .ahora {
+    background: var(--superficie);
+    border-radius: var(--radio);
+    padding: var(--espacio-3) var(--espacio-5);
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+    display: grid;
+    gap: var(--espacio-1);
+  }
+  .ahora__titulo {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-2);
+    color: var(--texto);
+    font-weight: 600;
+    font-size: var(--texto-base);
+    margin-block-end: var(--espacio-1);
+  }
+  .punto {
+    inline-size: 0.55rem;
+    block-size: 0.55rem;
+    border-radius: 50%;
+    background: var(--naranja);
+  }
+  .valor {
+    color: var(--texto);
+  }
+
+  /* Secciones y canales comparten fila: deja más alto para el estudio. */
+  .menu {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 var(--espacio-6);
+  }
+
+  .secciones ul,
+  .canales ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacio-2) var(--espacio-6);
+    padding: 0;
+    list-style: none;
+  }
+  .secciones a,
+  .canales a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--objetivo-tactil);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .secciones a {
+    font-family: var(--fuente-titulos);
+    font-size: var(--texto-lg);
+  }
+  .secciones a:hover,
+  .secciones a[aria-current="page"] {
+    text-decoration: underline;
+    text-decoration-color: var(--naranja);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 8px;
+  }
+  .canales a {
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+  .canales a:hover {
+    color: var(--naranja);
+  }
+
+  /* Móvil: cabecera compacta con el estudio pequeño. */
+  @media (max-width: 63.99rem) {
+    .columna {
+      grid-template-columns: 7.5rem 1fr;
+      grid-template-rows: none;
+      align-items: center;
+      gap: var(--espacio-4);
+      block-size: auto;
+    }
+    .estudio-marco {
+      inline-size: 100%;
+      block-size: auto;
+    }
+    .estudio-enlace,
+    .identidad {
+      grid-row: 1;
+    }
+    .ahora,
+    .menu {
+      grid-column: 1 / -1;
+    }
+    .nombre {
+      font-size: var(--titulo-2);
+    }
+    .frase {
+      font-size: var(--texto-sm);
+    }
+  }
+</style>
+
+<script>
+  // Fase 1b: intenta montar la escena 3D. Este archivo es muy pequeño; Three.js
+  // solo se descarga si el navegador cumple las condiciones (ver montar.ts).
+  import "../scripts/estudio/montar";
+</script>

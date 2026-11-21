@@ -1,0 +1,69 @@
+---
+/*
+  /contacto — correo y canales (spec 6 y 9). Solo mailto: el sitio no
+  tiene servidor, así que no hay formulario hasta la fase 4.
+*/
+import DeskLayout from "../layouts/DeskLayout.astro";
+import { SITE, POR_COMPLETAR, type SocialKey } from "../site";
+
+const LABELS: Record<SocialKey, string> = {
+  youtube: "YouTube",
+  tiktok: "TikTok",
+  instagram: "Instagram",
+  github: "GitHub",
+};
+const canales = (Object.keys(SITE.social) as SocialKey[]).map((k) => ({
+  label: LABELS[k],
+  href: SITE.social[k],
+}));
+---
+
+<DeskLayout
+  title="Contacto"
+  description="Cómo escribir a Commit&Cafe: correo y canales."
+  foco="taza"
+>
+  <div class="prosa">
+    <h1>Contacto</h1>
+    <p>
+      Para colaboraciones, ideas de video o para contar que algo de aquí te
+      sirvió.
+    </p>
+
+    <h2>Correo</h2>
+    {SITE.email ? (
+      <p>
+        <a href={`mailto:${SITE.email}`} class="correo">
+          {SITE.email}
+        </a>
+      </p>
+    ) : (
+      <p class="pendiente">{POR_COMPLETAR}: correo de contacto.</p>
+    )}
+
+    <h2>Canales</h2>
+    <ul>
+      {canales.map((c) => (
+        <li>
+          {c.href ? (
+            <a href={c.href} rel="me noopener">
+              {c.label}
+            </a>
+          ) : (
+            <span class="pendiente">
+              {c.label}: {POR_COMPLETAR}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</DeskLayout>
+
+<style>
+  .correo {
+    font-family: var(--fuente-titulos);
+    font-size: var(--titulo-3);
+    font-weight: 600;
+  }
+</style>
