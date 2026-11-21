@@ -2,6 +2,13 @@
 
 Registro corto de decisiones y su porqué. La más nueva va arriba.
 
+## 2026-11-20 · Estudio: más grande, lámpara y último video
+
+- **Escena más grande:** secciones y canales comparten fila, la tarjeta "Ahora" es más compacta y el marco puede llegar a 30rem de alto. La columna sigue sin scroll y no cambia entre páginas. Si el marco queda más angosto que 4:3, la cámara abre el ángulo para no cortar los lados de la habitación.
+- **Lámpara:** clic = apagar/encender. No es una sección; el estado se recuerda en `localStorage` (solo comodidad de quien visita).
+- **Último video en el monitor:** la miniatura (`mqdefault`, 16:9) se **descarga en el build** con `getImage` y se sirve desde nuestro dominio. Así no hace falta abrir la CSP a `ytimg.com`, no hay problemas de CORS en WebGL y quien visita no se conecta a Google (la página de privacidad sigue siendo cierta). Clic en la miniatura = abre el video en otra pestaña; clic en el resto del monitor = `/log`.
+- **Reproducir el video dentro del 3D no es posible:** el navegador no deja pintar un reproductor de otro sitio sobre WebGL.
+
 ## 2026-11-20 · Fase 1b: el estudio en 3D
 
 - **Three.js 0.187 autoalojado** (pnpm, no CDN: la CSP lo bloquearía). Se importan solo las piezas usadas.

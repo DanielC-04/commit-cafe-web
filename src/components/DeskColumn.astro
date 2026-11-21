@@ -5,6 +5,7 @@
   "Ahora", la navegación por secciones y los canales.
 */
 import { getCollection, getEntry } from "astro:content";
+import { getImage } from "astro:assets";
 import EstudioIlustracion, { type Foco } from "./EstudioIlustracion.astro";
 import { getSections } from "../lib/sections";
 import { isPublished, getLog } from "../lib/log";
@@ -36,6 +37,28 @@ const [sections, now, projects, breaks, log] = await Promise.all([
 const enlaces = Object.fromEntries(
   sections.filter((s) => s.objeto !== "general").map((s) => [s.objeto, s.href]),
 );
+/*
+  Último video: la miniatura se descarga y optimiza en el build y se sirve
+  desde nuestro dominio (sin CSP extra ni conexiones a Google al visitar).
+  Si el build no puede descargarla, el monitor simplemente no la muestra.
+*/
+let video: DatosEscena["video"];
+const ultimoVideo = log.find((e) => e.platform === "youtube");
+if (ultimoVideo) {
+  const id = ultimoVideo.key.split("/")[1];
+  try {
+    const img = await getImage({
+      src: `https://i.ytimg.com/vi/${id}/mqdefault.jpg`,
+      width: 448,
+      height: 252,
+      format: "webp",
+    });
+    video = { img: img.src, url: ultimoVideo.url, title: ultimoVideo.title };
+  } catch {
+    video = undefined;
+  }
+}
+
 const datosEscena: DatosEscena = {
   foco,
   tazaVolcada,
@@ -44,6 +67,7 @@ const datosEscena: DatosEscena = {
   ahora: now?.data.building ?? POR_COMPLETAR,
   entradas: log.slice(0, 4).map((e) => ({ hash: e.hash, title: e.title })),
   enlaces,
+  video,
 };
 
 const path = Astro.url.pathname
@@ -112,36 +136,38 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
     </p>
   </div>
 
-  <nav aria-label="Secciones" class="secciones">
-    <ul role="list">
-      {sections.map((s) => (
-        <li>
-          <a
-            href={s.href}
-            data-objeto={s.objeto}
-            aria-current={isCurrent(s.href) ? "page" : undefined}
-          >
-            {s.label}
-          </a>
-        </li>
-      ))}
-    </ul>
-  </nav>
-
-  {canales.length > 0 && (
-    <nav aria-label="Canales" class="canales">
+  <div class="menu">
+    <nav aria-label="Secciones" class="secciones">
       <ul role="list">
-        {canales.map((c) => (
+        {sections.map((s) => (
           <li>
-            <a href={c.href} rel="me noopener" target="_blank">
-              {c.label}
-              <span class="visually-hidden"> (se abre en otra pestaña)</span>
+            <a
+              href={s.href}
+              data-objeto={s.objeto}
+              aria-current={isCurrent(s.href) ? "page" : undefined}
+            >
+              {s.label}
             </a>
           </li>
         ))}
       </ul>
     </nav>
-  )}
+
+    {canales.length > 0 && (
+      <nav aria-label="Canales" class="canales">
+        <ul role="list">
+          {canales.map((c) => (
+            <li>
+              <a href={c.href} rel="me noopener" target="_blank">
+                {c.label}
+                <span class="visually-hidden"> (se abre en otra pestaña)</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )}
+  </div>
 </div>
 
 <style>
@@ -153,8 +179,10 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
   */
   .columna {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) repeat(4, auto);
-    gap: var(--espacio-5);
+    grid-template-rows: minmax(0, 1fr) repeat(3, auto);
+    /* Una sola columna que nunca crece más que el espacio disponible. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--espacio-4);
     block-size: 100%;
   }
 
@@ -171,7 +199,7 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
     position: relative;
     display: block;
     block-size: 100%;
-    max-block-size: 24rem;
+    max-block-size: 30rem;
     aspect-ratio: 4 / 3;
     max-inline-size: 100%;
     border-radius: var(--radio);
@@ -214,13 +242,13 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
     margin-block-start: var(--espacio-4);
     color: var(--texto-suave);
     font-size: var(--texto-base);
-    max-inline-size: 38ch;
+    max-inline-size: 46ch;
   }
 
   .ahora {
     background: var(--superficie);
     border-radius: var(--radio);
-    padding: var(--espacio-4) var(--espacio-6);
+    padding: var(--espacio-3) var(--espacio-5);
     color: var(--texto-suave);
     font-size: var(--texto-sm);
     display: grid;
@@ -243,6 +271,15 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
   }
   .valor {
     color: var(--texto);
+  }
+
+  /* Secciones y canales comparten fila: deja más alto para el estudio. */
+  .menu {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 var(--espacio-6);
   }
 
   .secciones ul,
@@ -298,8 +335,7 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
       grid-row: 1;
     }
     .ahora,
-    .secciones,
-    .canales {
+    .menu {
       grid-column: 1 / -1;
     }
     .nombre {

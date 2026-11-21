@@ -12,7 +12,7 @@ Pon `draft: true` y el contenido solo se verá en `pnpm dev`, nunca en el sitio 
 
 ## Un video de YouTube
 
-Nada: se cargan solos desde el feed del canal en cada build. Requisito (una sola vez): poner el `youtubeChannelId` en `src/site.ts`. Netlify reconstruye el sitio cuando subes a `main`, así que los videos nuevos aparecen en el siguiente despliegue.
+Nada: se cargan solos desde el feed del canal en cada build. El más reciente aparece además en el monitor del estudio 3D, con su miniatura. Requisito (una sola vez): poner el `youtubeChannelId` en `src/site.ts`. Netlify reconstruye el sitio cuando subes a `main`, así que los videos nuevos aparecen en el siguiente despliegue.
 
 ## Un TikTok, un Reel de Instagram o una nota
 
