@@ -29,6 +29,12 @@ export default defineConfig({
   // y la CSP los bloquearía.
   markdown: { syntaxHighlight: "prism" },
 
+  // Miniaturas de YouTube: se descargan en el build (solo de este dominio)
+  // para el monitor del estudio 3D.
+  image: {
+    remotePatterns: [{ protocol: "https", hostname: "i.ytimg.com" }],
+  },
+
   // Fuentes: Astro las descarga de Fontsource durante el build y las sirve
   // desde nuestro propio dominio (privacidad), con preload y fuentes de
   // respaldo ajustadas para que el texto no "salte" al cargar (CLS).

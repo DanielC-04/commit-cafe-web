@@ -138,13 +138,16 @@ export function montarEscena({ enlace, marco, datos }: Montaje) {
     -1.54,
   );
 
-  // Lámpara.
+  // Lámpara: no es una sección; un clic la apaga o la enciende.
+  const lampara = new Group();
+  scene.add(lampara);
   add(
     new CylinderGeometry(0.08, 0.1, 0.03, 12),
     mat(C.carbon),
     -1.3,
     0.97,
     -0.5,
+    lampara,
   );
   add(
     new CylinderGeometry(0.015, 0.015, 0.7, 6),
@@ -152,17 +155,20 @@ export function montarEscena({ enlace, marco, datos }: Montaje) {
     -1.3,
     1.3,
     -0.5,
+    lampara,
   );
+  const pantallaLampara = mat(C.naranja, {
+    side: DoubleSide,
+    emissive: new Color(C.naranja),
+    emissiveIntensity: 0.35,
+  });
   add(
     new ConeGeometry(0.2, 0.22, 14, 1, true),
-    mat(C.naranja, {
-      side: DoubleSide,
-      emissive: new Color(C.naranja),
-      emissiveIntensity: 0.35,
-    }),
+    pantallaLampara,
     -1.3,
     1.72,
     -0.5,
+    lampara,
   );
 
   /* ---------- Objetos-sección (se pueden resaltar y clicar) ---------- */
@@ -185,7 +191,7 @@ export function montarEscena({ enlace, marco, datos }: Montaje) {
   lienzo.height = 600;
   const textura = new CanvasTexture(lienzo);
   textura.colorSpace = SRGBColorSpace;
-  add(
+  const pantalla = add(
     new PlaneGeometry(1.5, 0.88),
     new MeshBasicMaterial({ map: textura }),
     0,
@@ -193,8 +199,21 @@ export function montarEscena({ enlace, marco, datos }: Montaje) {
     -0.685,
     monitor,
   );
-  dibujarPantalla(lienzo, textura, datos);
-  document.fonts?.ready.then(() => dibujarPantalla(lienzo, textura, datos));
+  // La miniatura del último video se sirve desde nuestro dominio (se
+  // descarga en el build), así que se puede dibujar sin problemas de CORS.
+  let miniatura: HTMLImageElement | null = null;
+  const redibujar = () => dibujarPantalla(lienzo, textura, datos, miniatura);
+  if (datos.video) {
+    const img = new Image();
+    img.decoding = "async";
+    img.onload = () => {
+      miniatura = img;
+      redibujar();
+    };
+    img.src = datos.video.img;
+  }
+  redibujar();
+  document.fonts?.ready.then(redibujar);
 
   // Taza y vapor.
   const taza = grupo("taza");
@@ -302,6 +321,32 @@ export function montarEscena({ enlace, marco, datos }: Montaje) {
   const luzLampara = new PointLight(0xffc98a, 14, 7, 1.6);
   luzLampara.position.set(-1.3, 1.6, -0.35);
   scene.add(luzLampara);
+
+  const CLAVE_LAMPARA = "estudio:lampara";
+  let lamparaEncendida = true;
+  try {
+    lamparaEncendida = localStorage.getItem(CLAVE_LAMPARA) !== "apagada";
+  } catch {
+    /* sin almacenamiento: encendida */
+  }
+  function aplicarLampara() {
+    luzLampara.visible = lamparaEncendida;
+    pantallaLampara.emissiveIntensity = lamparaEncendida ? 0.35 : 0;
+    pantallaLampara.color.setHex(lamparaEncendida ? C.naranja : C.apagada);
+  }
+  aplicarLampara();
+  function alternarLampara() {
+    lamparaEncendida = !lamparaEncendida;
+    aplicarLampara();
+    try {
+      localStorage.setItem(
+        CLAVE_LAMPARA,
+        lamparaEncendida ? "encendida" : "apagada",
+      );
+    } catch {
+      /* no pasa nada */
+    }
+  }
   const luzFrontal = new PointLight(C.crema, 6, 6, 1.6);
   luzFrontal.position.set(0.3, 1.9, 0.6);
   scene.add(luzFrontal);
@@ -327,18 +372,42 @@ export function montarEscena({ enlace, marco, datos }: Montaje) {
   /* ---------- Clic y hover sobre objetos ---------- */
   const raycaster = new Raycaster();
   const puntero = new Vector2();
-  function objetoBajo(evento: PointerEvent): Objeto | null {
+  /** Qué hay bajo el cursor y qué hace un clic ahí. */
+  type Objetivo =
+    | { tipo: "seccion"; nombre: Objeto; href: string }
+    | { tipo: "video"; href: string }
+    | { tipo: "lampara" }
+    | null;
+
+  function objetivoBajo(evento: PointerEvent | MouseEvent): Objetivo {
     const r = canvas.getBoundingClientRect();
     puntero.set(
       ((evento.clientX - r.left) / r.width) * 2 - 1,
       -((evento.clientY - r.top) / r.height) * 2 + 1,
     );
     raycaster.setFromCamera(puntero, camera);
-    const [hit] = raycaster.intersectObjects([...objetos.values()], true);
-    let o: Object3D | null = hit?.object ?? null;
-    while (o && !o.userData.objeto) o = o.parent;
+    const [hit] = raycaster.intersectObjects(
+      [...objetos.values(), lampara],
+      true,
+    );
+    if (!hit) return null;
+
+    // ¿Cayó en la miniatura del video, dentro de la pantalla del monitor?
+    if (hit.object === pantalla && hit.uv && datos.video) {
+      const x = hit.uv.x * 1024;
+      const y = (1 - hit.uv.y) * 600;
+      const z = ZONA_VIDEO;
+      if (x >= z.x && x <= z.x + z.w && y >= z.y && y <= z.y + z.h) {
+        return { tipo: "video", href: datos.video.url };
+      }
+    }
+
+    let o: Object3D | null = hit.object;
+    while (o && o !== lampara && !o.userData.objeto) o = o.parent;
+    if (o === lampara) return { tipo: "lampara" };
     const nombre = (o?.userData.objeto as Objeto | undefined) ?? null;
-    return nombre && datos.enlaces[nombre] ? nombre : null;
+    const href = nombre ? datos.enlaces[nombre] : undefined;
+    return nombre && href ? { tipo: "seccion", nombre, href } : null;
   }
 
   let mx = 0;
@@ -347,9 +416,15 @@ export function montarEscena({ enlace, marco, datos }: Montaje) {
     const r = canvas.getBoundingClientRect();
     mx = ((e.clientX - r.left) / r.width - 0.5) * 2;
     my = ((e.clientY - r.top) / r.height - 0.5) * 2;
-    const nombre = objetoBajo(e);
-    resaltar(nombre);
-    canvas.style.cursor = nombre ? "pointer" : "";
+    const objetivo = objetivoBajo(e);
+    resaltar(
+      objetivo?.tipo === "seccion"
+        ? objetivo.nombre
+        : objetivo?.tipo === "video"
+          ? "monitor"
+          : null,
+    );
+    canvas.style.cursor = objetivo ? "pointer" : "";
   });
   canvas.addEventListener("pointerleave", () => {
     mx = 0;
@@ -359,13 +434,17 @@ export function montarEscena({ enlace, marco, datos }: Montaje) {
   // El canvas está dentro del enlace al inicio: si el clic cae en un
   // objeto con sección, vamos a esa sección en vez de al inicio.
   enlace.addEventListener("click", (e) => {
-    if (!(e instanceof PointerEvent) || e.target !== canvas) return;
-    const nombre = objetoBajo(e);
-    const href = nombre ? datos.enlaces[nombre] : null;
-    if (href) {
-      e.preventDefault();
+    if (e.target !== canvas) return;
+    const objetivo = objetivoBajo(e);
+    if (!objetivo) return; // espacio vacío: el enlace lleva al inicio
+    e.preventDefault();
+    if (objetivo.tipo === "lampara") {
+      alternarLampara();
+    } else if (objetivo.tipo === "video") {
+      window.open(objetivo.href, "_blank", "noopener");
+    } else {
       guardarCamara();
-      location.href = href;
+      location.href = objetivo.href;
     }
   });
 
@@ -416,6 +495,16 @@ export function montarEscena({ enlace, marco, datos }: Montaje) {
     if (!width || !height) return;
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
+    // Si el marco es más angosto que 4:3, abrimos el ángulo vertical para
+    // conservar el mismo ancho de habitación (no se cortan los lados).
+    const base = (42 * Math.PI) / 180;
+    camera.fov =
+      camera.aspect >= 4 / 3
+        ? 42
+        : (2 *
+            Math.atan((Math.tan(base / 2) * (4 / 3)) / camera.aspect) *
+            180) /
+          Math.PI;
     camera.updateProjectionMatrix();
   }
   new ResizeObserver(ajustar).observe(marco);
@@ -453,7 +542,7 @@ export function montarEscena({ enlace, marco, datos }: Montaje) {
       );
       v.m.material.opacity = Math.sin(p * Math.PI);
     }
-    luzLampara.intensity = 14 + Math.sin(t * 3) * 0.3;
+    if (lamparaEncendida) luzLampara.intensity = 14 + Math.sin(t * 3) * 0.3;
 
     renderer.render(scene, camera);
     if (primerCuadro) {
@@ -493,11 +582,15 @@ export function montarEscena({ enlace, marco, datos }: Montaje) {
   arrancar();
 }
 
-/* Dibuja la pantalla del monitor con el estado y las últimas entradas. */
+/* Zona de la miniatura dentro de la pantalla (coordenadas del lienzo 1024×600). */
+const ZONA_VIDEO = { x: 56, y: 196, w: 448, h: 252 };
+
+/* Dibuja la pantalla del monitor: estado, último video y últimas entradas. */
 function dibujarPantalla(
   lienzo: HTMLCanvasElement,
   textura: CanvasTexture,
   datos: DatosEscena,
+  miniatura: HTMLImageElement | null,
 ) {
   const g = lienzo.getContext("2d");
   if (!g) return;
@@ -523,21 +616,59 @@ function dibujarPantalla(
   g.font = fuente(400, 28, "--font-figtree");
   g.fillText(`Ahora: ${recortar(g, datos.ahora, 860)}`, 84, 162);
 
-  if (datos.entradas.length === 0) {
+  if (datos.entradas.length === 0 && !datos.video) {
     g.fillStyle = "#B8AE9E";
     g.font = fuente(400, 32, "--font-figtree");
     g.fillText("El primer commit está en camino.", 56, 300);
   }
-  datos.entradas.forEach((e, i) => {
+
+  // Con video: miniatura a la izquierda y las entradas en una columna a la
+  // derecha. Sin video: las entradas ocupan todo el ancho.
+  let x0 = 56;
+  let anchoFilas = 912;
+  let filas = datos.entradas.slice(0, 4);
+  if (datos.video) {
+    const z = ZONA_VIDEO;
+    g.fillStyle = "#1B1D1C";
+    g.fillRect(z.x, z.y, z.w, z.h);
+    if (miniatura) g.drawImage(miniatura, z.x, z.y, z.w, z.h);
+    // Botón de "play" para que se entienda que se puede abrir.
+    const cx = z.x + z.w / 2;
+    const cy = z.y + z.h / 2;
+    g.fillStyle = "rgba(27, 29, 28, 0.75)";
+    g.beginPath();
+    g.arc(cx, cy, 44, 0, Math.PI * 2);
+    g.fill();
+    g.fillStyle = "#E8913F";
+    g.beginPath();
+    g.moveTo(cx - 14, cy - 22);
+    g.lineTo(cx + 24, cy);
+    g.lineTo(cx - 14, cy + 22);
+    g.closePath();
+    g.fill();
+    g.fillStyle = "#B8AE9E";
+    g.font = fuente(400, 24, "--font-figtree");
+    g.fillText("Último video", z.x, z.y + z.h + 40);
+    g.fillStyle = "#F5E8D5";
+    g.font = fuente(600, 30, "--font-outfit");
+    g.fillText(recortar(g, datos.video.title, z.w), z.x, z.y + z.h + 80);
+    x0 = z.x + z.w + 40;
+    anchoFilas = 968 - x0;
+    filas = filas.slice(0, 3);
+  }
+
+  filas.forEach((e, i) => {
     const y = 250 + i * 88;
     g.fillStyle = "#1B1D1C";
-    g.fillRect(56, y - 44, 912, 2);
+    g.fillRect(x0, y - 44, anchoFilas, 2);
     g.fillStyle = "#B8AE9E";
     g.font = fuente(400, 26, "--font-jetbrains");
-    g.fillText(e.hash, 56, y + 10);
+    g.fillText(e.hash, x0, y + 10);
     g.fillStyle = "#F5E8D5";
     g.font = fuente(600, 34, "--font-outfit");
-    g.fillText(recortar(g, e.title, 740), 220, y + 10);
+    const xt = datos.video ? x0 : x0 + 164;
+    const yt = datos.video ? y + 50 : y + 10;
+    g.fillText(recortar(g, e.title, anchoFilas - (xt - x0)), xt, yt);
   });
   textura.needsUpdate = true;
 }

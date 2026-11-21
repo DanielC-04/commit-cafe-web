@@ -13,6 +13,8 @@ export interface DatosEscena {
   ahora: string;
   /** Últimas entradas del log para la pantalla del monitor. */
   entradas: { hash: string; title: string }[];
+  /** Último video de YouTube (miniatura servida desde nuestro dominio). */
+  video?: { img: string; url: string; title: string };
   /** Adónde lleva cada objeto al hacer clic (solo secciones que existen). */
   enlaces: Partial<Record<Objeto, string>>;
 }
