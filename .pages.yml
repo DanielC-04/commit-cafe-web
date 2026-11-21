@@ -1,0 +1,310 @@
+# Configuración del panel Pages CMS. Edita la rama `contenido`, nunca develop ni main.
+# Si cambia un campo de colección en src/content.config.ts, actualiza también este archivo.
+media:
+  input: public/media
+  output: /media
+
+content:
+  - name: projects
+    label: Taller (proyectos)
+    type: collection
+    path: src/content/projects
+    format: yaml-frontmatter
+    filename:
+      template: "{primary}.mdx"
+      field: create
+    view:
+      primary: title
+      sort: publishedAt
+      order: desc
+    fields:
+      - name: title
+        label: Título
+        type: string
+        required: true
+      - name: tagline
+        label: Frase breve
+        type: text
+        required: true
+        options:
+          maxlength: 140
+      - name: status
+        label: Estado
+        type: select
+        required: true
+        options:
+          values:
+            - name: idea
+              label: Idea
+            - name: building
+              label: En construcción
+            - name: shipped
+              label: Publicado
+            - name: paused
+              label: En pausa
+            - name: broken
+              label: Roto
+      - name: startedAt
+        label: Fecha de inicio
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: publishedAt
+        label: Fecha de publicación
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: draft
+        label: Borrador (no se publica)
+        type: boolean
+        default: false
+      - name: stack
+        label: Tecnologías
+        type: string
+        list: true
+      - name: tags
+        label: Etiquetas
+        type: string
+        list: true
+        description: Escribe las etiquetas en minúsculas.
+      - name: links
+        label: Enlaces
+        type: object
+        required: true
+        fields:
+          - name: repo
+            label: Repositorio
+            type: string
+            required: true
+            pattern:
+              regex: "^https?://"
+              message: Escribe una URL que comience con http:// o https://.
+          - name: demo
+            label: Demo
+            type: string
+            pattern:
+              regex: "^https?://"
+              message: Escribe una URL que comience con http:// o https://.
+          - name: video
+            label: Video
+            type: string
+            pattern:
+              regex: "^https?://"
+              message: Escribe una URL que comience con http:// o https://.
+      - name: body
+        label: Relato del proyecto
+        type: rich-text
+        options:
+          format: markdown
+
+  - name: devlog
+    label: Devlog
+    type: collection
+    path: src/content/devlog
+    format: yaml-frontmatter
+    filename:
+      template: "{primary}.md"
+      field: create
+    fields:
+      - name: project
+        label: Proyecto
+        type: reference
+        required: true
+        options:
+          collection: projects
+          value: "{path}"
+          label: "{primary}"
+      - name: title
+        label: Título
+        type: string
+        required: true
+      - name: publishedAt
+        label: Fecha de publicación
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: draft
+        label: Borrador (no se publica)
+        type: boolean
+        default: false
+      - name: tags
+        label: Etiquetas
+        type: string
+        list: true
+        description: Escribe las etiquetas en minúsculas.
+      - name: body
+        label: Avance
+        type: rich-text
+        options:
+          format: markdown
+
+  - name: breaks
+    label: Roturas
+    type: collection
+    path: src/content/breaks
+    format: yaml-frontmatter
+    filename:
+      template: "{primary}.md"
+      field: create
+    fields:
+      - name: title
+        label: Título
+        type: string
+        required: true
+      - name: summary
+        label: Resumen
+        type: text
+        required: true
+        options:
+          maxlength: 200
+      - name: project
+        label: Proyecto relacionado
+        type: reference
+        options:
+          collection: projects
+          value: "{path}"
+          label: "{primary}"
+      - name: severity
+        label: Gravedad
+        type: select
+        required: true
+        options:
+          values:
+            - name: susto
+              label: Susto
+            - name: caída
+              label: Caída
+            - name: desastre
+              label: Desastre
+      - name: publishedAt
+        label: Fecha de publicación
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: draft
+        label: Borrador (no se publica)
+        type: boolean
+        default: false
+      - name: tags
+        label: Etiquetas
+        type: string
+        list: true
+        description: Escribe las etiquetas en minúsculas.
+      - name: body
+        label: Qué pasó y cómo se arregló
+        type: rich-text
+        options:
+          format: markdown
+
+  - name: posts
+    label: Shorts y notas
+    type: collection
+    path: src/content/posts
+    format: yaml-frontmatter
+    filename:
+      template: "{primary}.md"
+      field: create
+    fields:
+      - name: title
+        label: Título
+        type: string
+        required: true
+      - name: summary
+        label: Resumen
+        type: text
+        required: true
+        options:
+          maxlength: 200
+      - name: kind
+        label: Tipo
+        type: select
+        required: true
+        options:
+          values:
+            - name: short
+              label: Video corto
+            - name: note
+              label: Nota escrita
+      - name: platform
+        label: Plataforma
+        type: select
+        required: true
+        options:
+          values:
+            - name: youtube
+              label: YouTube
+            - name: tiktok
+              label: TikTok
+            - name: instagram
+              label: Instagram
+            - name: web
+              label: Web (nota propia)
+      - name: url
+        label: URL
+        type: string
+        description: Obligatoria salvo si la plataforma es Web.
+        pattern:
+          regex: "^https?://"
+          message: Escribe una URL que comience con http:// o https://.
+      - name: project
+        label: Proyecto relacionado
+        type: reference
+        options:
+          collection: projects
+          value: "{path}"
+          label: "{primary}"
+      - name: publishedAt
+        label: Fecha de publicación
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: draft
+        label: Borrador (no se publica)
+        type: boolean
+        default: false
+      - name: tags
+        label: Etiquetas
+        type: string
+        list: true
+        description: Escribe las etiquetas en minúsculas.
+      - name: body
+        label: Nota
+        type: rich-text
+        description: Solo para notas propias.
+        options:
+          format: markdown
+
+  - name: now
+    label: Ahora (columna del estudio)
+    type: file
+    path: src/content/now.json
+    format: json
+    fields:
+      - name: estudio
+        label: Estudio
+        type: object
+        fields:
+          - name: building
+            label: Construyendo ahora
+            type: string
+          - name: lastCommit
+            label: Último avance
+            type: string
+          - name: updatedAt
+            label: Fecha de actualización
+            type: date
+            options:
+              format: yyyy-MM-dd
+
+settings:
+  commit:
+    templates:
+      create: "chore(contenido): crear {path}"
+      update: "chore(contenido): editar {path}"
+      delete: "chore(contenido): borrar {path}"
+      rename: "chore(contenido): renombrar {oldPath} a {newPath}"
