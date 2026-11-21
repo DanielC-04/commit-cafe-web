@@ -39,6 +39,9 @@
   html {
     -webkit-text-size-adjust: none;
     text-size-adjust: none;
+    /* Reserva siempre el hueco de la barra de scroll: así el ancho no
+       cambia entre páginas cortas (sin barra) y largas (con barra). */
+    scrollbar-gutter: stable;
   }
 
   body {

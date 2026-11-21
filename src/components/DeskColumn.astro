@@ -54,16 +54,20 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
   </a>
 
   <div class="identidad">
+    {/* Mismo aspecto en todas las páginas: solo cambia la etiqueta (en el
+        inicio es el <h1>), así la columna nunca cambia de tamaño. */}
     {home ? (
-      <h1 class="nombre nombre--grande">
+      <h1 class="nombre">
         Commit<span class="amp">&</span>Cafe
       </h1>
     ) : (
-      <a href="/" class="nombre">
-        Commit<span class="amp">&</span>Cafe
-      </a>
+      <p class="nombre">
+        <a href="/">
+          Commit<span class="amp">&</span>Cafe
+        </a>
+      </p>
     )}
-    {home && <p class="frase">{SITE.description}</p>}
+    <p class="frase">{SITE.description}</p>
   </div>
 
   <div class="ahora">
@@ -113,26 +117,43 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
 </div>
 
 <style>
+  /*
+    Escritorio: la columna ocupa exactamente el alto de la pantalla. Todo
+    tiene su tamaño natural salvo el estudio, que se encoge o crece para
+    llenar lo que sobra (fila minmax(0, 1fr)). Así nunca aparece scroll y
+    la columna es idéntica en todas las páginas.
+  */
   .columna {
     display: grid;
+    grid-template-rows: minmax(0, 1fr) repeat(4, auto);
     gap: var(--espacio-5);
+    block-size: 100%;
   }
 
   .estudio-enlace {
-    display: block;
+    display: flex;
+    /* En pantallas altas, el estudio se pega al nombre (el aire va arriba). */
+    align-items: flex-end;
+    min-block-size: 0;
     border-radius: var(--radio);
+  }
+  .estudio-enlace :global(.estudio) {
+    block-size: 100%;
+    max-block-size: 24rem;
+    inline-size: auto;
+    max-inline-size: 100%;
   }
 
   .nombre {
     font-family: var(--fuente-titulos);
     font-weight: 700;
-    font-size: var(--titulo-3);
+    font-size: clamp(2rem, 1.4rem + 1.4vw, 3rem);
     line-height: 1;
-    text-decoration: none;
-    color: var(--texto);
+    letter-spacing: -0.02em;
   }
-  .nombre--grande {
-    font-size: var(--titulo-1);
+  .nombre a {
+    color: inherit;
+    text-decoration: none;
   }
   .amp {
     color: var(--naranja);
@@ -140,8 +161,8 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
   .frase {
     margin-block-start: var(--espacio-4);
     color: var(--texto-suave);
-    font-size: var(--texto-lg);
-    max-inline-size: 34ch;
+    font-size: var(--texto-base);
+    max-inline-size: 38ch;
   }
 
   .ahora {
@@ -211,8 +232,14 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
   @media (max-width: 63.99rem) {
     .columna {
       grid-template-columns: 7.5rem 1fr;
+      grid-template-rows: none;
       align-items: center;
       gap: var(--espacio-4);
+      block-size: auto;
+    }
+    .estudio-enlace :global(.estudio) {
+      inline-size: 100%;
+      block-size: auto;
     }
     .estudio-enlace,
     .identidad {
@@ -223,11 +250,11 @@ const canales = (Object.keys(SITE.social) as SocialKey[])
     .canales {
       grid-column: 1 / -1;
     }
-    .nombre--grande {
+    .nombre {
       font-size: var(--titulo-2);
     }
     .frase {
-      font-size: var(--texto-base);
+      font-size: var(--texto-sm);
     }
   }
 </style>

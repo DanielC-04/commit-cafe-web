@@ -79,6 +79,10 @@ const { home, foco, tazaVolcada, ...base } = Astro.props;
       position: sticky;
       inset-block-start: 0;
       block-size: 100dvb;
+      display: grid;
+      /* Una sola fila del alto exacto de la columna (no del contenido). */
+      grid-template-rows: minmax(0, 1fr);
+      /* Solo por si la ventana es muy baja (< ~600 px de alto). */
       overflow-y: auto;
       padding: var(--espacio-8) var(--espacio-12);
       border-block-end: 0;

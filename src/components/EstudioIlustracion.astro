@@ -230,10 +230,8 @@ const coloresLibro = ["var(--crema)", "var(--crema-apagada)", "var(--naranja)"];
 
 <style>
   .estudio {
-    /* Ancho completo, pero sin pasar del 40 % del alto de la pantalla
-       (la proporción es 4:3), para que la columna quepa sin scroll. */
-    inline-size: min(100%, calc(40dvb * 4 / 3));
-    block-size: auto;
+    /* El tamaño lo decide quien la usa (DeskColumn). */
+    display: block;
     border-radius: var(--radio);
   }
 
