@@ -1,0 +1,46 @@
+---
+/*
+  Página de log reutilizable: la usan /log, /log/tipo/… y /log/etiqueta/…
+  Recibe una página ya paginada y muestra título, filtros, filas y
+  enlaces de paginación.
+*/
+import type { Page } from "astro";
+import DeskLayout from "../layouts/DeskLayout.astro";
+import LogList from "./LogList.astro";
+import KindFilters from "./KindFilters.astro";
+import Pagination from "./Pagination.astro";
+import type { LogEntry, LogKind } from "../lib/log";
+
+interface Props {
+  page: Page<LogEntry>;
+  title: string;
+  description: string;
+  kinds: LogKind[];
+  activeKind?: LogKind;
+}
+
+const { page, title, description, kinds, activeKind } = Astro.props;
+const sufijo = page.currentPage > 1 ? ` (página ${page.currentPage})` : "";
+---
+
+<DeskLayout
+  title={`${title}${sufijo}`}
+  description={description}
+  foco="monitor"
+>
+  <h1 class="titulo">{title}</h1>
+  <p class="intro">{description}</p>
+  <KindFilters kinds={kinds} active={activeKind} />
+  <LogList entries={page.data} />
+  <Pagination page={page} />
+</DeskLayout>
+
+<style>
+  .titulo {
+    margin-block-end: var(--espacio-2);
+  }
+  .intro {
+    color: var(--texto-suave);
+    margin-block-end: var(--espacio-6);
+  }
+</style>

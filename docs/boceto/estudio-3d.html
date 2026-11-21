@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Commit&Cafe — el estudio 3D</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=Figtree:wght@400;500&display=swap"
+    />
+    <style>
+      :root {
+        --carbon: #1b1d1c;
+        --alto: #262928;
+        --crema: #f5e8d5;
+        --apagada: #b8ae9e;
+        --naranja: #e8913f;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: var(--carbon);
+        color: var(--crema);
+        font:
+          400 16px/1.5 Figtree,
+          sans-serif;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .ui {
+        position: fixed;
+        left: 0;
+        right: 0;
+        pointer-events: none;
+        padding: 20px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .top {
+        top: env(safe-area-inset-top, 0px);
+        align-items: flex-start;
+      }
+      .bot {
+        bottom: env(safe-area-inset-bottom, 0px);
+      }
+      h1 {
+        margin: 0;
+        font:
+          700 28px/1 Outfit,
+          sans-serif;
+      }
+      .card {
+        pointer-events: auto;
+        background: var(--alto);
+        border-radius: 8px;
+        padding: 14px 18px;
+        color: var(--apagada);
+        max-width: 300px;
+      }
+      .card b {
+        color: var(--crema);
+        font-weight: 500;
+      }
+      .dot {
+        display: inline-block;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--naranja);
+        margin-right: 8px;
+      }
+      .btns {
+        display: flex;
+        gap: 10px;
+        pointer-events: auto;
+        flex-wrap: wrap;
+      }
+      button {
+        font:
+          500 15px Figtree,
+          sans-serif;
+        color: var(--crema);
+        background: transparent;
+        border: 1px solid var(--crema);
+        border-radius: 6px;
+        padding: 12px 18px;
+        min-height: 44px;
+        cursor: pointer;
+      }
+      button:hover,
+      button:focus-visible {
+        border-color: var(--naranja);
+        color: var(--naranja);
+        outline: none;
+      }
+      #fb {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        padding: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ui top">
+      <h1>Commit&amp;Cafe</h1>
+      <span style="color: var(--apagada); max-width: 30ch; text-align: right"
+        >Prototipo del estudio. Mueve el cursor para mirar alrededor.</span
+      >
+    </div>
+    <div class="ui bot">
+      <div class="card">
+        <div><span class="dot"></span><b>Ahora</b></div>
+        Construyendo: [POR COMPLETAR]<br /><span id="info"
+          >Contenido: 3 entradas. Sin pizarra ni estante todavía.</span
+        >
+      </div>
+      <div class="btns">
+        <button id="zoom">Acercar al monitor</button
+        ><button id="more">Simular más contenido</button>
+      </div>
+    </div>
+    <div id="fb" hidden>
+      <p>
+        Tu navegador no pudo iniciar WebGL.<br />Aquí se mostraría la versión
+        rápida del sitio.
+      </p>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      (function () {
+        const $ = (s) => document.querySelector(s);
+        const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        let R;
+        try {
+          R = new THREE.WebGLRenderer({ antialias: true });
+        } catch (e) {
+          $("#fb").hidden = false;
+          return;
+        }
+        R.setPixelRatio(Math.min(devicePixelRatio, 2));
+        document.body.appendChild(R.domElement);
+        const S = new THREE.Scene();
+        S.background = new THREE.Color(0x1b1d1c);
+        S.fog = new THREE.Fog(0x1b1d1c, 6, 15);
+        const C = new THREE.PerspectiveCamera(50, 1, 0.1, 50);
+        const M = (c, o) =>
+          new THREE.MeshStandardMaterial(
+            Object.assign({ color: c, roughness: 0.8 }, o),
+          );
+        const add = (g, m, x, y, z, p) => {
+          const o = new THREE.Mesh(g, m);
+          o.position.set(x, y, z);
+          (p || S).add(o);
+          return o;
+        };
+        const B = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+        // sala
+        add(new THREE.PlaneGeometry(16, 10), M(0x222524), 0, 0, 0).rotation.x =
+          -Math.PI / 2;
+        add(new THREE.PlaneGeometry(16, 6), M(0x2a2d2b), 0, 3, -1.6);
+        // escritorio
+        add(B(3.6, 0.12, 1.4), M(0x3b2a1f), 0, 0.9, -0.4);
+        [
+          [-1.7, -0.9],
+          [1.7, -0.9],
+          [-1.7, 0.1],
+          [1.7, 0.1],
+        ].forEach((p) => add(B(0.1, 0.85, 0.1), M(0x2d1f17), p[0], 0.45, p[1]));
+        // monitor con la pantalla dibujada
+        const cv = document.createElement("canvas");
+        cv.width = 1024;
+        cv.height = 600;
+        const g = cv.getContext("2d");
+        function pantalla() {
+          g.fillStyle = "#1B1D1C";
+          g.fillRect(0, 0, 1024, 600);
+          g.fillStyle = "#F5E8D5";
+          g.font = "700 54px Outfit,sans-serif";
+          g.fillText("Commit&Cafe", 48, 92);
+          g.fillStyle = "#E8913F";
+          g.beginPath();
+          g.arc(52, 142, 8, 0, 7);
+          g.fill();
+          g.fillStyle = "#B8AE9E";
+          g.font = "400 26px Figtree,sans-serif";
+          g.fillText("Ahora: [POR COMPLETAR]", 72, 152);
+          [
+            ["a3f9c21", "[Título del primer video]"],
+            ["7be10d4", "[Proyecto en construcción]"],
+            ["c92a6f8", "[Título de un short]"],
+            ["41d8e07", "[Algo que se rompió]"],
+          ].forEach((r, i) => {
+            const y = 230 + i * 90;
+            g.fillStyle = "#262928";
+            g.fillRect(48, y - 36, 928, 2);
+            g.fillStyle = "#B8AE9E";
+            g.font = "400 24px monospace";
+            g.fillText(r[0], 48, y + 12);
+            g.fillStyle = "#F5E8D5";
+            g.font = "600 32px Outfit,sans-serif";
+            g.fillText(r[1], 200, y + 12);
+          });
+          tex.needsUpdate = true;
+        }
+        const tex = new THREE.CanvasTexture(cv);
+        add(B(1.6, 0.95, 0.06), M(0x111312), 0, 1.7, -0.72);
+        add(B(0.12, 0.35, 0.1), M(0x111312), 0, 1.15, -0.72);
+        add(B(0.5, 0.03, 0.3), M(0x111312), 0, 0.98, -0.7);
+        const scr = add(
+          new THREE.PlaneGeometry(1.5, 0.88),
+          new THREE.MeshBasicMaterial({ map: tex }),
+          0,
+          1.7,
+          -0.685,
+        );
+        pantalla();
+        if (document.fonts) document.fonts.ready.then(pantalla);
+        // taza y vapor
+        const cx = 1,
+          cz = 0.15;
+        add(
+          new THREE.CylinderGeometry(0.14, 0.11, 0.22, 24),
+          M(0xf5e8d5),
+          cx,
+          1.07,
+          cz,
+        );
+        add(
+          new THREE.CylinderGeometry(0.125, 0.125, 0.01, 24),
+          M(0x2a1a10),
+          cx,
+          1.175,
+          cz,
+        );
+        const asa = add(
+          new THREE.TorusGeometry(0.07, 0.02, 10, 20),
+          M(0xf5e8d5),
+          cx + 0.16,
+          1.07,
+          cz,
+        );
+        const vap = [];
+        for (let i = 0; i < 18; i++) {
+          const m = add(
+            new THREE.SphereGeometry(0.022, 8, 8),
+            new THREE.MeshBasicMaterial({ color: 0xe8913f, transparent: true }),
+            cx,
+            1.2,
+            cz,
+          );
+          vap.push({ m, f: i / 18 });
+        }
+        // lámpara
+        add(
+          new THREE.CylinderGeometry(0.08, 0.1, 0.03, 16),
+          M(0x111312),
+          -1.3,
+          0.97,
+          -0.5,
+        );
+        add(
+          new THREE.CylinderGeometry(0.015, 0.015, 0.7, 8),
+          M(0x111312),
+          -1.3,
+          1.3,
+          -0.5,
+        );
+        add(
+          new THREE.ConeGeometry(0.2, 0.22, 20, 1, true),
+          M(0xe8913f, { side: 2, emissive: 0x6b3a10 }),
+          -1.3,
+          1.72,
+          -0.5,
+        );
+        const L = new THREE.PointLight(0xffc98a, 1.4, 7);
+        L.position.set(-1.3, 1.6, -0.35);
+        S.add(L);
+        const L2 = new THREE.PointLight(0xf5e8d5, 0.6, 5);
+        L2.position.set(0, 1.7, 0.3);
+        S.add(L2);
+        S.add(new THREE.AmbientLight(0x4a443e, 0.7));
+        // ventana (siempre) y extras que aparecen con más contenido
+        add(B(1.7, 1.2, 0.04), M(0x111312), -2.7, 2.5, -1.58);
+        add(
+          new THREE.PlaneGeometry(1.5, 1),
+          new THREE.MeshBasicMaterial({ color: 0x0e1114 }),
+          -2.7,
+          2.5,
+          -1.55,
+        );
+        add(
+          new THREE.CircleGeometry(0.12, 24),
+          new THREE.MeshBasicMaterial({ color: 0xf5e8d5 }),
+          -2.45,
+          2.75,
+          -1.54,
+        );
+        const X = new THREE.Group();
+        X.visible = false;
+        S.add(X);
+        add(
+          new THREE.PlaneGeometry(1.8, 1.1),
+          M(0xf5e8d5, { emissive: 0x2a251d }),
+          2.6,
+          2.4,
+          -1.57,
+          X,
+        );
+        [
+          [-0.6, 0.2, 0.9],
+          [-0.6, -0.1, 0.6],
+          [-0.6, -0.35, 1.1],
+        ].forEach((s) =>
+          add(
+            B(s[2], 0.035, 0.01),
+            new THREE.MeshBasicMaterial({ color: 0xe8913f }),
+            2.6 + s[0] + s[2] / 2 - 0.3,
+            2.4 + s[1],
+            -1.56,
+            X,
+          ),
+        );
+        add(B(1.3, 0.05, 0.3), M(0x3b2a1f), -3, 1.4, -1.4, X);
+        add(B(1.3, 0.05, 0.3), M(0x3b2a1f), -3, 1.9, -1.4, X);
+        [0xe8913f, 0xf5e8d5, 0xb8ae9e, 0xe8913f, 0xf5e8d5].forEach((c, i) => {
+          add(B(0.12, 0.38, 0.2), M(c), -3.4 + i * 0.22, 1.62, -1.4, X);
+          add(
+            B(0.12, 0.32, 0.2),
+            M(c == 0xf5e8d5 ? 0xb8ae9e : 0xf5e8d5),
+            -3.4 + i * 0.22,
+            2.12,
+            -1.4,
+            X,
+          );
+        });
+        // cámara
+        let zoom = false,
+          mx = 0,
+          my = 0,
+          px = 0,
+          py = 0,
+          pz = 4.4,
+          ty = 1.55;
+        const look = new THREE.Vector3(0, 1.4, -0.5);
+        function resize() {
+          const w = innerWidth,
+            h = innerHeight;
+          R.setSize(w, h);
+          C.aspect = w / h;
+          C.updateProjectionMatrix();
+        }
+        addEventListener("resize", resize);
+        resize();
+        addEventListener("pointermove", (e) => {
+          mx = (e.clientX / innerWidth - 0.5) * 2;
+          my = (e.clientY / innerHeight - 0.5) * 2;
+        });
+        function setZoom(v) {
+          zoom = v;
+          $("#zoom").textContent = zoom ? "Alejar" : "Acercar al monitor";
+        }
+        $("#zoom").onclick = () => setZoom(!zoom);
+        addEventListener("keydown", (e) => {
+          if (e.key === "Escape") setZoom(false);
+        });
+        const ray = new THREE.Raycaster(),
+          v2 = new THREE.Vector2();
+        R.domElement.addEventListener("click", (e) => {
+          v2.set(
+            (e.clientX / innerWidth) * 2 - 1,
+            -(e.clientY / innerHeight) * 2 + 1,
+          );
+          ray.setFromCamera(v2, C);
+          if (ray.intersectObject(scr).length) setZoom(!zoom);
+        });
+        $("#more").onclick = () => {
+          X.visible = !X.visible;
+          $("#more").textContent = X.visible
+            ? "Volver a 3 entradas"
+            : "Simular más contenido";
+          $("#info").textContent = X.visible
+            ? "Contenido: 40 entradas. Aparecen la pizarra y el estante."
+            : "Contenido: 3 entradas. Sin pizarra ni estante todavía.";
+        };
+        // bucle
+        const t0 = performance.now();
+        function loop() {
+          requestAnimationFrame(loop);
+          const t = (performance.now() - t0) / 1000,
+            k = reduce ? 1 : 0.06;
+          const tz = zoom ? 1.5 : 4.4,
+            tx = zoom ? 0 : mx * 0.9,
+            tyy = (zoom ? 1.7 : 1.55) - (zoom ? 0 : my * 0.25);
+          px += (tx - px) * k;
+          py += (tyy - py) * k;
+          pz += (tz - pz) * k;
+          C.position.set(px, py, pz);
+          look.set(zoom ? 0 : mx * 0.3, zoom ? 1.7 : 1.4, -0.6);
+          C.lookAt(look);
+          if (!reduce)
+            vap.forEach((v) => {
+              const p = (t * 0.22 + v.f) % 1;
+              v.m.position.set(
+                cx + Math.sin(t * 2 + v.f * 20) * 0.05 * p,
+                1.2 + p * 0.75,
+                cz + Math.cos(t * 1.7 + v.f * 20) * 0.03 * p,
+              );
+              v.m.material.opacity = Math.sin(p * Math.PI);
+            });
+          else
+            vap.forEach((v) => {
+              v.m.position.set(cx, 1.2 + v.f * 0.5, cz);
+              v.m.material.opacity = 0.6;
+            });
+          L.intensity = 1.4 + (reduce ? 0 : Math.sin(t * 3) * 0.03);
+          R.render(S, C);
+        }
+        loop();
+      })();
+    </script>
+  </body>
+</html>

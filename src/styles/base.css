@@ -117,6 +117,39 @@
   }
 }
 
+@layer components {
+  /* Texto largo (Estudio, Privacidad, relatos): ritmo vertical cómodo. */
+  .prosa > * + * {
+    margin-block-start: var(--espacio-4);
+  }
+  .prosa h2 {
+    margin-block-start: var(--espacio-12);
+  }
+  .prosa h3 {
+    margin-block-start: var(--espacio-8);
+  }
+  .prosa p,
+  .prosa li {
+    font-size: 1.125rem;
+    line-height: 1.65;
+    max-inline-size: 62ch;
+  }
+  .prosa ul {
+    padding-inline-start: var(--espacio-6);
+  }
+  .pendiente {
+    color: var(--texto-suave);
+  }
+}
+
+/* Transiciones entre páginas (View Transitions nativas, sin JS). La
+   columna del estudio tiene nombre propio y se queda quieta. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
 @layer utilities {
   .visually-hidden:not(:focus):not(:active) {
     position: absolute;

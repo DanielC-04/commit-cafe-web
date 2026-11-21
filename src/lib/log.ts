@@ -6,6 +6,7 @@
   sola vez y aparece sola en el log, ordenada de lo más nuevo a lo más viejo.
 */
 import { getCollection, type CollectionEntry } from "astro:content";
+import { SITE } from "../site";
 
 export type LogKind =
   "video" | "short" | "project" | "devlog" | "break" | "note";
@@ -137,7 +138,8 @@ export async function getLog(): Promise<LogEntry[]> {
     getCollection("devlog", isPublished),
     getCollection("breaks", isPublished),
     getCollection("posts", isPublished),
-    getCollection("videos"),
+    // Sin canal configurado la colección está vacía: no se consulta (evita avisos).
+    SITE.youtubeChannelId ? getCollection("videos") : Promise.resolve([]),
   ]);
 
   return [

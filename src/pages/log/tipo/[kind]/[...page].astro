@@ -1,0 +1,37 @@
+---
+/* /log/tipo/video, /log/tipo/project/2, … — solo tipos con entradas. */
+import type { GetStaticPaths } from "astro";
+import LogPage from "../../../../components/LogPage.astro";
+import {
+  getLog,
+  facets,
+  KIND_LABELS,
+  type LogEntry,
+  type LogKind,
+} from "../../../../lib/log";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const log = await getLog();
+  const { kinds } = facets(log);
+  return kinds.flatMap((kind) =>
+    paginate(
+      log.filter((e) => e.kind === kind),
+      { pageSize: 20, params: { kind }, props: { kinds, kind } },
+    ),
+  );
+}) satisfies GetStaticPaths;
+
+const { page, kinds, kind } = Astro.props as {
+  page: import("astro").Page<LogEntry>;
+  kinds: LogKind[];
+  kind: LogKind;
+};
+---
+
+<LogPage
+  page={page}
+  title={`Log · ${KIND_LABELS[kind]}`}
+  description={`Entradas del estudio de tipo «${KIND_LABELS[kind].toLowerCase()}».`}
+  kinds={kinds}
+  activeKind={kind}
+/>

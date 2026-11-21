@@ -1,0 +1,21 @@
+---
+/* /log, /log/2, … — el log completo, paginado. No existe si está vacío. */
+import type { GetStaticPaths } from "astro";
+import LogPage from "../../components/LogPage.astro";
+import { getLog, facets, type LogEntry } from "../../lib/log";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const log = await getLog();
+  if (log.length === 0) return [];
+  return paginate(log, { pageSize: 20, props: { kinds: facets(log).kinds } });
+}) satisfies GetStaticPaths;
+
+const { page, kinds } = Astro.props;
+---
+
+<LogPage
+  page={page as import("astro").Page<LogEntry>}
+  title="Log"
+  description="Todo lo que pasa en el estudio, de lo más nuevo a lo más viejo."
+  kinds={kinds}
+/>

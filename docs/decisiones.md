@@ -2,6 +2,15 @@
 
 Registro corto de decisiones y su porqué. La más nueva va arriba.
 
+## 2026-11-20 · Fase 1a: unión de los bocetos
+
+- **El estudio como escenario.** `boceto-web.html` da la estructura (columna fija + filas del log) y `estudio-3d.html` el mundo. La columna fija muestra la habitación en todas las páginas; el contenido siempre es HTML (spec 7.1).
+- **Fase 1a con ilustración SVG** (`EstudioIlustracion.astro`), sin JavaScript: cada objeto aparece según el contenido (estante = proyectos, caja = roturas) y se resalta el de la página actual. La escena Three.js llega en la fase 1b y la sustituirá solo donde el navegador pueda.
+- **Sin color madera.** El boceto 3D usaba un marrón para el escritorio; se cambió por los tonos de la paleta (spec 7: no agregar colores).
+- **Puerta de contenido real:** `/log`, `/taller` y `/roturas` son rutas `[...page]` que devuelven `[]` cuando no hay entradas, así que ni se generan ni se enlazan.
+- **Ejemplos en borrador:** `src/content/**/ejemplo-*` tienen `draft: true` y `[EJEMPLO]` en el título. Solo se ven en `pnpm dev`; se borran o reemplazan con el primer contenido real.
+- **`TazaViva.astro` eliminada:** su papel lo cumple la taza de la ilustración.
+
 ## 2026-11-20 · Rama develop y despliegues por lotes
 
 - **Solo producción gasta créditos** en Netlify (15 por despliegue; 300 al mes en el plan gratuito). Vistas previas y despliegues de rama son gratis.

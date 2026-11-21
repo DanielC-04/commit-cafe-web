@@ -1,28 +1,39 @@
 ---
 /*
-  DeskLayout: la "mesa de trabajo" (spec 7, Maquetación).
-  - Escritorio: columna izquierda fija (~5/12) con la taza, el nombre,
-    el estado "Ahora" y los canales; contenido a la derecha (~7/12).
-  - Móvil: la columna se reduce a una cabecera compacta y todo va en
-    una sola columna.
-  El contenido de la columna llega por el slot "desk"; el principal,
-  por el slot por defecto.
+  DeskLayout: la "mesa de trabajo" (spec 7, boceto-web.html).
+  - Escritorio: columna izquierda fija (~5/12) con el estudio; contenido
+    a la derecha (~7/12).
+  - Móvil: la columna se reduce a una cabecera y todo va en una columna.
+  La columna tiene view-transition-name para que no "parpadee" al cambiar
+  de página: el navegador la mantiene y solo cambia el contenido.
 */
 import BaseLayout from "./BaseLayout.astro";
+import DeskColumn from "../components/DeskColumn.astro";
+import type { Foco } from "../components/EstudioIlustracion.astro";
 
-type Props = import("astro/types").ComponentProps<typeof BaseLayout>;
-const props = Astro.props;
+type BaseProps = import("astro/types").ComponentProps<typeof BaseLayout>;
+type Props = BaseProps & {
+  home?: boolean;
+  foco?: Foco;
+  tazaVolcada?: boolean;
+};
+
+const { home, foco, tazaVolcada, ...base } = Astro.props;
 ---
 
-<BaseLayout {...props}>
+<BaseLayout {...base}>
   <slot name="head" slot="head" />
   <div class="desk">
     <header class="desk__columna">
-      <slot name="desk" />
+      <DeskColumn home={home} foco={foco} tazaVolcada={tazaVolcada} />
     </header>
     <main id="contenido" class="desk__contenido" tabindex="-1">
       <slot />
     </main>
+    <footer class="desk__pie">
+      <a href="/privacidad">Privacidad</a>
+      <span>Commit&amp;Cafe · {new Date().getFullYear()}</span>
+    </footer>
   </div>
 </BaseLayout>
 
@@ -36,14 +47,28 @@ const props = Astro.props;
   .desk__columna {
     padding: var(--espacio-4);
     border-block-end: var(--borde);
+    view-transition-name: estudio;
   }
 
   .desk__contenido {
     padding: var(--espacio-8) var(--espacio-4) var(--espacio-16);
-    min-inline-size: 0; /* evita que URLs largas desborden la columna */
+    min-inline-size: 0;
+    max-inline-size: 52rem;
   }
   .desk__contenido:focus {
     outline: none;
+  }
+
+  .desk__pie {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacio-2) var(--espacio-6);
+    padding: var(--espacio-6) var(--espacio-4) var(--espacio-8);
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+  .desk__pie a {
+    color: inherit;
   }
 
   @media (min-width: 64rem) {
@@ -55,12 +80,19 @@ const props = Astro.props;
       inset-block-start: 0;
       block-size: 100dvb;
       overflow-y: auto;
-      padding: var(--espacio-12);
+      padding: var(--espacio-8) var(--espacio-12);
       border-block-end: 0;
-      border-inline-end: var(--borde);
     }
     .desk__contenido {
-      padding: var(--espacio-16) var(--espacio-12);
+      padding: var(--espacio-16) var(--espacio-12) var(--espacio-8) 0;
+    }
+    .desk__columna {
+      grid-row: 1 / span 2;
+      align-self: start;
+    }
+    .desk__pie {
+      grid-column: 2;
+      padding-inline: 0 var(--espacio-12);
     }
   }
 </style>

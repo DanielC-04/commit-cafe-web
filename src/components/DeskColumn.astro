@@ -1,0 +1,233 @@
+---
+/*
+  Columna fija de la "mesa de trabajo" (boceto-web.html, <aside>).
+  Contiene: el estudio, el nombre, la frase (solo en inicio), el estado
+  "Ahora", la navegación por secciones y los canales.
+*/
+import { getCollection, getEntry } from "astro:content";
+import EstudioIlustracion, { type Foco } from "./EstudioIlustracion.astro";
+import { getSections } from "../lib/sections";
+import { isPublished } from "../lib/log";
+import { SITE, POR_COMPLETAR, type SocialKey } from "../site";
+
+interface Props {
+  /** En el inicio el nombre es el <h1> y se muestra la frase. */
+  home?: boolean;
+  foco?: Foco;
+  tazaVolcada?: boolean;
+}
+
+const { home = false, foco = "general", tazaVolcada = false } = Astro.props;
+
+const [sections, now, projects, breaks] = await Promise.all([
+  getSections(),
+  getEntry("now", "estudio"),
+  getCollection("projects", isPublished),
+  getCollection("breaks", isPublished),
+]);
+
+const path = Astro.url.pathname
+  .replace(/(index)?\.html$/, "")
+  .replace(/\/$/, "");
+const isCurrent = (href: string) =>
+  path === href || path.startsWith(`${href}/`);
+
+const SOCIAL_LABELS: Record<SocialKey, string> = {
+  youtube: "YouTube",
+  tiktok: "TikTok",
+  instagram: "Instagram",
+  github: "GitHub",
+};
+const canales = (Object.keys(SITE.social) as SocialKey[])
+  .filter((k) => SITE.social[k])
+  .map((k) => ({ label: SOCIAL_LABELS[k], href: SITE.social[k]! }));
+---
+
+<div class="columna">
+  <a href="/" class="estudio-enlace" aria-label="Inicio de Commit&Cafe">
+    <EstudioIlustracion
+      foco={foco}
+      proyectos={projects.length}
+      roturas={breaks.length > 0}
+      tazaVolcada={tazaVolcada}
+    />
+  </a>
+
+  <div class="identidad">
+    {home ? (
+      <h1 class="nombre nombre--grande">
+        Commit<span class="amp">&</span>Cafe
+      </h1>
+    ) : (
+      <a href="/" class="nombre">
+        Commit<span class="amp">&</span>Cafe
+      </a>
+    )}
+    {home && <p class="frase">{SITE.description}</p>}
+  </div>
+
+  <div class="ahora">
+    <p class="ahora__titulo">
+      <span class="punto" aria-hidden="true"></span>
+      Ahora
+    </p>
+    <p>
+      Construyendo:{" "}
+      <span class="valor">{now?.data.building ?? POR_COMPLETAR}</span>
+    </p>
+    <p>
+      Último commit:{" "}
+      <span class="valor">{now?.data.lastCommit ?? POR_COMPLETAR}</span>
+    </p>
+  </div>
+
+  <nav aria-label="Secciones" class="secciones">
+    <ul role="list">
+      {sections.map((s) => (
+        <li>
+          <a
+            href={s.href}
+            aria-current={isCurrent(s.href) ? "page" : undefined}
+          >
+            {s.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  {canales.length > 0 && (
+    <nav aria-label="Canales" class="canales">
+      <ul role="list">
+        {canales.map((c) => (
+          <li>
+            <a href={c.href} rel="me noopener" target="_blank">
+              {c.label}
+              <span class="visually-hidden"> (se abre en otra pestaña)</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )}
+</div>
+
+<style>
+  .columna {
+    display: grid;
+    gap: var(--espacio-5);
+  }
+
+  .estudio-enlace {
+    display: block;
+    border-radius: var(--radio);
+  }
+
+  .nombre {
+    font-family: var(--fuente-titulos);
+    font-weight: 700;
+    font-size: var(--titulo-3);
+    line-height: 1;
+    text-decoration: none;
+    color: var(--texto);
+  }
+  .nombre--grande {
+    font-size: var(--titulo-1);
+  }
+  .amp {
+    color: var(--naranja);
+  }
+  .frase {
+    margin-block-start: var(--espacio-4);
+    color: var(--texto-suave);
+    font-size: var(--texto-lg);
+    max-inline-size: 34ch;
+  }
+
+  .ahora {
+    background: var(--superficie);
+    border-radius: var(--radio);
+    padding: var(--espacio-4) var(--espacio-6);
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+    display: grid;
+    gap: var(--espacio-1);
+  }
+  .ahora__titulo {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-2);
+    color: var(--texto);
+    font-weight: 600;
+    font-size: var(--texto-base);
+    margin-block-end: var(--espacio-1);
+  }
+  .punto {
+    inline-size: 0.55rem;
+    block-size: 0.55rem;
+    border-radius: 50%;
+    background: var(--naranja);
+  }
+  .valor {
+    color: var(--texto);
+  }
+
+  .secciones ul,
+  .canales ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espacio-2) var(--espacio-6);
+    padding: 0;
+    list-style: none;
+  }
+  .secciones a,
+  .canales a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--objetivo-tactil);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .secciones a {
+    font-family: var(--fuente-titulos);
+    font-size: var(--texto-lg);
+  }
+  .secciones a:hover,
+  .secciones a[aria-current="page"] {
+    text-decoration: underline;
+    text-decoration-color: var(--naranja);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 8px;
+  }
+  .canales a {
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+  .canales a:hover {
+    color: var(--naranja);
+  }
+
+  /* Móvil: cabecera compacta con el estudio pequeño. */
+  @media (max-width: 63.99rem) {
+    .columna {
+      grid-template-columns: 7.5rem 1fr;
+      align-items: center;
+      gap: var(--espacio-4);
+    }
+    .estudio-enlace,
+    .identidad {
+      grid-row: 1;
+    }
+    .ahora,
+    .secciones,
+    .canales {
+      grid-column: 1 / -1;
+    }
+    .nombre--grande {
+      font-size: var(--titulo-2);
+    }
+    .frase {
+      font-size: var(--texto-base);
+    }
+  }
+</style>
