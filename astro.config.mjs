@@ -11,6 +11,11 @@ const site = process.env.SITE_URL ?? process.env.URL ?? "http://localhost:4321";
 
 export default defineConfig({
   site,
+
+  // escena.js (Three.js) pesa ~540 KB sin comprimir (~133 KB comprimido) y
+  // ya se carga aparte, solo cuando hace falta (spec 10: ≤ 200 KB diferidos).
+  // Subimos el umbral del aviso de Vite para no confundirlo con un problema.
+  vite: { build: { chunkSizeWarningLimit: 600 } },
   // URLs sin barra final: /taller/mi-api (no /taller/mi-api/).
   trailingSlash: "never",
   build: { format: "file" },
