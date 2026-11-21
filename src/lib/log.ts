@@ -131,8 +131,21 @@ const fromVideo = (v: CollectionEntry<"videos">) =>
     publishedAt: v.data.publishedAt,
   });
 
+/*
+  En el build el contenido no cambia, así que el log se calcula una sola
+  vez y se reutiliza en todas las páginas. En `pnpm dev` se recalcula
+  siempre para ver los cambios al guardar.
+*/
+let cache: Promise<LogEntry[]> | undefined;
+
 /** Todo el log, de lo más nuevo a lo más viejo. */
-export async function getLog(): Promise<LogEntry[]> {
+export function getLog(): Promise<LogEntry[]> {
+  if (import.meta.env.DEV) return calcularLog();
+  cache ??= calcularLog();
+  return cache;
+}
+
+async function calcularLog(): Promise<LogEntry[]> {
   const [projects, devlog, breaks, posts, videos] = await Promise.all([
     getCollection("projects", isPublished),
     getCollection("devlog", isPublished),

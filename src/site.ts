@@ -15,18 +15,26 @@ export const SITE = {
   /** Nombre de la persona autora (para JSON-LD y la página Estudio). */
   author: null as string | null,
   /** Correo público de contacto. */
-  email: null as string | null,
-  /** Handle único en redes, sin @ (p. ej. "commitandcafe"). */
+  email: "danielcc.dev@gmail.com" as string | null,
+  /**
+    Handle único en redes, sin @. Hoy no es el mismo en todas
+    (TikTok: commitcafe7, Instagram: commitandcafe), así que queda en null.
+  */
   handle: null as string | null,
 
   /** ID del canal de YouTube (empieza por "UC"). Activa el feed de videos. */
-  youtubeChannelId: null as string | null,
+  youtubeChannelId: "UCXHQ-YgUsq2VHAaLa_WeHsg" as string | null,
 
-  /** Enlaces a los canales. Los que estén en null no se muestran. */
+  /**
+    Enlaces a los canales (sin los parámetros de rastreo que añaden las
+    apps al compartir, como ?_r= o ?knvt=). Los que estén en null no se
+    muestran.
+  */
   social: {
-    youtube: null as string | null,
-    tiktok: null as string | null,
-    instagram: null as string | null,
+    youtube: "https://www.youtube.com/channel/UCXHQ-YgUsq2VHAaLa_WeHsg" as
+      string | null,
+    tiktok: "https://www.tiktok.com/@commitcafe7" as string | null,
+    instagram: "https://www.instagram.com/commitandcafe/" as string | null,
     github: "https://github.com/DanielC-04" as string | null,
   },
 };
