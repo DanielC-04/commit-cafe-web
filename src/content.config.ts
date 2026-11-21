@@ -23,6 +23,32 @@ const base = {
 
 const plataforma = z.enum(["youtube", "tiktok", "instagram", "web"]);
 
+/** Convierte referencias escritas como rutas o nombres de archivo a ids Astro. */
+const aIdDeProyecto = (valor: unknown) => {
+  if (typeof valor !== "string") return valor;
+  const nombre = valor.trim();
+  if (!nombre) return undefined;
+  return nombre
+    .split(/[\\/]/)
+    .at(-1)
+    ?.replace(/\.mdx?$/i, "");
+};
+
+/** Una URL opcional: el panel guarda "" si se deja vacía; eso cuenta como ausente. */
+const urlOpcional = z.preprocess(
+  (valor) => (valor === "" ? undefined : valor),
+  z.url().optional(),
+);
+
+/**
+  Texto del estado "Ahora": si el panel lo guarda vacío ("") se convierte en
+  null, y la columna sigue mostrando [POR COMPLETAR].
+*/
+const textoAhora = z.preprocess(
+  (valor) => (typeof valor === "string" && !valor.trim() ? null : valor),
+  z.string().nullable(),
+);
+
 /** Proyectos del Taller: un relato poco técnico por proyecto. */
 const projects = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/projects" }),
@@ -37,8 +63,8 @@ const projects = defineCollection({
       stack: z.array(z.string()).default([]),
       links: z.object({
         repo: z.url(),
-        demo: z.url().optional(),
-        video: z.url().optional(),
+        demo: urlOpcional,
+        video: urlOpcional,
       }),
       cover: image().optional(),
       coverAlt: z.string().optional(),
@@ -50,7 +76,7 @@ const devlog = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/devlog" }),
   schema: z.object({
     ...base,
-    project: reference("projects"),
+    project: z.preprocess(aIdDeProyecto, reference("projects")),
     title: z.string(),
   }),
 });
@@ -62,7 +88,7 @@ const breaks = defineCollection({
     ...base,
     title: z.string(),
     summary: z.string().max(200),
-    project: reference("projects").optional(),
+    project: z.preprocess(aIdDeProyecto, reference("projects").optional()),
     severity: z.enum(["susto", "caída", "desastre"]),
   }),
 });
@@ -78,8 +104,8 @@ const posts = defineCollection({
       kind: z.enum(["short", "note"]),
       platform: plataforma,
       /** Enlace externo (obligatorio si la plataforma no es "web"). */
-      url: z.url().optional(),
-      project: reference("projects").optional(),
+      url: urlOpcional,
+      project: z.preprocess(aIdDeProyecto, reference("projects").optional()),
     })
     .refine((p) => p.platform === "web" || p.url, {
       message: 'Si la plataforma no es "web", falta el campo url.',
@@ -105,9 +131,9 @@ const now = defineCollection({
   loader: file("./src/content/now.json"),
   schema: z.object({
     /** Qué se está construyendo ahora, en una frase. */
-    building: z.string().nullable(),
+    building: textoAhora,
     /** Último commit o avance, en una frase. */
-    lastCommit: z.string().nullable(),
+    lastCommit: textoAhora,
     updatedAt: z.coerce.date(),
   }),
 });
