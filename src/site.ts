@@ -1,8 +1,16 @@
 /*
-  Datos del sitio y de la persona. Es el ÚNICO lugar donde van.
+  Datos del sitio y enlaces públicos. El nombre personal viene del panel Estudio.
   Lo que todavía no existe queda en null y la web muestra [POR COMPLETAR]
   (o esconde el enlace), nunca un dato inventado. Spec 12.6 y 13.
 */
+
+import estudioData from "./content/estudio.json";
+
+/*
+  TypeScript deduce el tipo del JSON tal como está hoy (nombre: null), así
+  que se lo decimos explícitamente: puede ser texto o null.
+*/
+const nombre = estudioData.estudio.nombre as string | null;
 
 export const POR_COMPLETAR = "[POR COMPLETAR]";
 
@@ -12,8 +20,8 @@ export const SITE = {
     "El estudio de Commit&Cafe: videos, proyectos y notas sobre desarrollo de software, contados sin tecnicismos.",
   locale: "es",
 
-  /** Nombre de la persona autora (para JSON-LD y la página Estudio). */
-  author: null as string | null,
+  /** Nombre de la persona autora (para JSON-LD), editable en el panel Estudio. */
+  author: nombre?.trim() || null,
   /** Correo público de contacto. */
   email: "danielcc.dev@gmail.com" as string | null,
   /**

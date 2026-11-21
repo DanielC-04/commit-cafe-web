@@ -301,6 +301,39 @@ content:
             options:
               format: yyyy-MM-dd
 
+  - name: estudio
+    label: Estudio (quién soy)
+    type: file
+    path: src/content/estudio.json
+    format: json
+    fields:
+      - name: estudio
+        label: Estudio
+        type: object
+        fields:
+          - name: nombre
+            label: Tu nombre
+            type: string
+          - name: presentacion
+            label: Presentación
+            type: text
+            description: Dos o tres frases. Separa párrafos con una línea en blanco.
+          - name: setup
+            label: Setup
+            type: string
+            list: true
+            description: "Equipo: computadora, monitor, micrófono, cámara…"
+          - name: herramientas
+            label: Herramientas
+            type: string
+            list: true
+            description: "Editor, terminal, lenguajes y apps del día a día."
+          - name: proceso
+            label: Cómo hago un video
+            type: string
+            list: true
+            description: Un paso por elemento, en orden.
+
 settings:
   commit:
     templates:

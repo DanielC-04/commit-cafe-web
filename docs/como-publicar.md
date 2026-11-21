@@ -20,6 +20,8 @@ Los videos de YouTube no necesitan que hagas nada: se cargan solos. Si un guarda
 
 Hay campos que el panel no puede vigilar: en "Shorts y notas", la URL es obligatoria salvo en las notas propias (plataforma Web). Si falta, el build lo avisa.
 
+La página Estudio (nombre, presentación, setup, herramientas y pasos) se edita en **"Estudio (quién soy)"**.
+
 ## A mano (sin panel)
 
 Si prefieres crear los archivos tú mismo, estas son las plantillas de cada tipo de contenido.
@@ -100,6 +102,22 @@ Edita `src/content/now.json`:
     "building": "Mi API de café",
     "lastCommit": "Primer endpoint funcionando",
     "updatedAt": "2026-11-22"
+  }
+}
+```
+
+## La página Estudio
+
+Edita `src/content/estudio.json`:
+
+```json
+{
+  "estudio": {
+    "nombre": null,
+    "presentacion": null,
+    "setup": [],
+    "herramientas": [],
+    "proceso": []
   }
 }
 ```
