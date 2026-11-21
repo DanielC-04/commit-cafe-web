@@ -2,6 +2,16 @@
 
 Registro corto de decisiones y su porqué. La más nueva va arriba.
 
+## 2026-11-20 · Fase 1b: el estudio en 3D
+
+- **Three.js 0.187 autoalojado** (pnpm, no CDN: la CSP lo bloquearía). Se importan solo las piezas usadas.
+- **Dos archivos:** `montar.ts` (≈1,3 KB comprimido, en todas las páginas) decide si vale la pena el 3D; `escena.ts` (≈133 KB comprimido, con Three.js) solo se descarga en escritorio, sin "reducir movimiento" ni ahorro de datos, y cuando el navegador está libre. Presupuesto de la spec: < 50 KB inicial, ≤ 200 KB diferido.
+- **La ilustración SVG sigue debajo:** el canvas aparece encima con un fundido y, si se pierde WebGL o la ventana se estrecha, vuelve la ilustración. El marco tiene tamaño fijo, así que cambiar de una a otra no mueve nada.
+- **Datos reales sin script en línea:** la página pasa a la escena las últimas entradas, el estado "Ahora", los conteos y los enlaces en el atributo `data-escena` (compatible con la CSP).
+- **Cámara:** cada página tiene su encuadre (`ENCUADRES` en `escena.ts`) y la cámara viaja desde el de la página anterior (`sessionStorage`). El suavizado depende del tiempo real, no de los cuadros por segundo.
+- **Interacción:** clic en un objeto = su sección (solo si existe); pasar o enfocar un enlace del menú resalta su objeto. El canvas es `aria-hidden`; los enlaces HTML siguen siendo la navegación.
+- **Pausa:** el bucle se detiene cuando la pestaña no se ve.
+
 ## 2026-11-20 · Fase 1a: unión de los bocetos
 
 - **El estudio como escenario.** `boceto-web.html` da la estructura (columna fija + filas del log) y `estudio-3d.html` el mundo. La columna fija muestra la habitación en todas las páginas; el contenido siempre es HTML (spec 7.1).
