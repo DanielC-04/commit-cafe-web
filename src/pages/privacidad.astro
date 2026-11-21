@@ -1,0 +1,63 @@
+---
+/*
+  /privacidad — breve y honesta (spec 9). Si se agrega analítica o videos
+  incrustados, ESTA página se actualiza en el mismo PR.
+*/
+import DeskLayout from "../layouts/DeskLayout.astro";
+import { SITE, POR_COMPLETAR } from "../site";
+---
+
+<DeskLayout
+  title="Privacidad"
+  description="Qué datos recoge este sitio (casi ninguno) y por qué."
+  foco="general"
+>
+  <div class="prosa">
+    <h1>Privacidad</h1>
+    <p>Versión corta: este sitio no te sigue.</p>
+
+    <h2>Lo que no hay</h2>
+    <ul>
+      <li>No hay cookies.</li>
+      <li>No hay analítica ni rastreadores publicitarios.</li>
+      <li>
+        No hay cuentas, formularios ni comentarios: no se guarda nada que
+        escribas.
+      </li>
+      <li>
+        Las fuentes se sirven desde este mismo dominio, así que no se llama a
+        servicios de terceros para cargarlas.
+      </li>
+    </ul>
+
+    <h2>Lo que sí pasa</h2>
+    <p>
+      El sitio está alojado en Netlify. Como cualquier servidor web, Netlify
+      recibe datos técnicos de cada visita (como la dirección IP y el navegador)
+      para poder entregar las páginas y proteger el servicio. Cómo los trata lo
+      explica la
+      <a href="https://www.netlify.com/privacy/" rel="noopener">
+        política de privacidad de Netlify
+      </a>
+    </p>
+    <p>
+      Los enlaces a YouTube, TikTok, Instagram o GitHub te llevan a esos sitios,
+      que tienen sus propias reglas.
+    </p>
+
+    <h2>Si esto cambia</h2>
+    <p>
+      Si algún día se agrega analítica (siempre sin cookies) o videos
+      incrustados, lo verás explicado aquí antes de que funcione.
+    </p>
+
+    <h2>Contacto</h2>
+    {SITE.email ? (
+      <p>
+        Dudas sobre tus datos: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </p>
+    ) : (
+      <p class="pendiente">Dudas sobre tus datos: {POR_COMPLETAR} (correo).</p>
+    )}
+  </div>
+</DeskLayout>

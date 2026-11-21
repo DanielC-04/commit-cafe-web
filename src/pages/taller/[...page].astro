@@ -1,0 +1,114 @@
+---
+/*
+  /taller — la lista de proyectos. Puerta de contenido: si no hay
+  proyectos publicados, esta página no se genera.
+*/
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import DeskLayout from "../../layouts/DeskLayout.astro";
+import { isPublished } from "../../lib/log";
+import { STATUS_LABELS, formatDate, isoDate } from "../../lib/format";
+
+export const getStaticPaths = (async () => {
+  const projects = await getCollection("projects", isPublished);
+  if (projects.length === 0) return [];
+  projects.sort(
+    (a, b) => b.data.startedAt.getTime() - a.data.startedAt.getTime(),
+  );
+  return [{ params: { page: undefined }, props: { projects } }];
+}) satisfies GetStaticPaths;
+
+const { projects } = Astro.props;
+---
+
+<DeskLayout
+  title="Taller"
+  description="Proyectos de Commit&Cafe contados como relato: por qué, qué se rompió y qué aprendí."
+  foco="estante"
+>
+  <h1>Taller</h1>
+  <p class="intro">
+    Proyectos contados como relato: por qué, qué se rompió y qué aprendí.
+  </p>
+
+  <ul class="proyectos" role="list">
+    {projects.map((p) => (
+      <li>
+        <a href={`/taller/${p.id}`} class="proyecto">
+          <span class="estado">
+            <span
+              class:list={["punto", `punto--${p.data.status}`]}
+              aria-hidden="true"
+            />
+            {STATUS_LABELS[p.data.status]}
+          </span>
+          <h2 class="proyecto__titulo">{p.data.title}</h2>
+          <span class="proyecto__frase">{p.data.tagline}</span>
+          <span class="proyecto__meta">
+            Empezó el{" "}
+            <time datetime={isoDate(p.data.startedAt)}>
+              {formatDate(p.data.startedAt)}
+            </time>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</DeskLayout>
+
+<style>
+  .intro {
+    color: var(--texto-suave);
+    margin-block: var(--espacio-2) var(--espacio-8);
+  }
+  .proyectos {
+    padding: 0;
+    list-style: none;
+  }
+  .proyecto {
+    display: grid;
+    gap: var(--espacio-1);
+    padding-block: var(--espacio-6);
+    border-block-start: 1px solid var(--superficie);
+    text-decoration: none;
+    color: var(--texto);
+  }
+  .proyecto__titulo {
+    font-size: var(--titulo-2);
+  }
+  .proyecto:hover .proyecto__titulo {
+    text-decoration: underline;
+    text-decoration-color: var(--naranja);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
+  .proyecto__frase {
+    color: var(--texto-suave);
+    font-size: var(--texto-lg);
+  }
+  .proyecto__meta {
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+  }
+  .estado {
+    display: flex;
+    align-items: center;
+    gap: var(--espacio-2);
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+    font-weight: 500;
+  }
+  .punto {
+    inline-size: 0.55rem;
+    block-size: 0.55rem;
+    border-radius: 50%;
+    background: var(--crema-apagada);
+  }
+  /* Naranja = vivo (spec 7): solo lo que está en marcha. */
+  .punto--building {
+    background: var(--naranja);
+  }
+  .punto--shipped {
+    background: var(--crema);
+  }
+</style>

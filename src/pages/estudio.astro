@@ -1,0 +1,44 @@
+---
+/*
+  /estudio — quién está detrás, el setup y cómo se hace un video (spec 6).
+  Todo lo personal queda como [POR COMPLETAR] hasta que la persona lo
+  escriba: nunca se inventa (spec 12.6).
+*/
+import DeskLayout from "../layouts/DeskLayout.astro";
+import { SITE, POR_COMPLETAR } from "../site";
+---
+
+<DeskLayout
+  title="Estudio"
+  description="Quién está detrás de Commit&Cafe, con qué trabaja y cómo se hace cada video."
+  foco="general"
+>
+  <div class="prosa">
+    <h1>El estudio</h1>
+    <p>
+      Commit&Cafe es un canal en español sobre desarrollo de software, contado
+      desde adentro: lo que se construye, lo que se rompe y lo que se aprende en
+      el camino. Esta web es su mesa de trabajo y crece con cada commit.
+    </p>
+
+    <h2>Quién soy</h2>
+    <p class="pendiente">
+      {SITE.author ?? POR_COMPLETAR}: presentación en dos o tres frases.
+    </p>
+
+    <h2>Setup</h2>
+    <p class="pendiente">
+      {POR_COMPLETAR}: equipo, monitor, micrófono, cámara.
+    </p>
+
+    <h2>Herramientas</h2>
+    <p class="pendiente">
+      {POR_COMPLETAR}: editor, terminal, lenguajes y apps del día a día.
+    </p>
+
+    <h2>Cómo hago un video</h2>
+    <p class="pendiente">
+      {POR_COMPLETAR}: de la idea al video publicado, paso a paso.
+    </p>
+  </div>
+</DeskLayout>

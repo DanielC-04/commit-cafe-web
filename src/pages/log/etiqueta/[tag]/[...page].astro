@@ -1,0 +1,35 @@
+---
+/* /log/etiqueta/git, … — solo etiquetas con entradas. */
+import type { GetStaticPaths } from "astro";
+import LogPage from "../../../../components/LogPage.astro";
+import {
+  getLog,
+  facets,
+  type LogEntry,
+  type LogKind,
+} from "../../../../lib/log";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const log = await getLog();
+  const { kinds, tags } = facets(log);
+  return tags.flatMap((tag) =>
+    paginate(
+      log.filter((e) => e.tags.includes(tag)),
+      { pageSize: 20, params: { tag }, props: { kinds, tag } },
+    ),
+  );
+}) satisfies GetStaticPaths;
+
+const { page, kinds, tag } = Astro.props as {
+  page: import("astro").Page<LogEntry>;
+  kinds: LogKind[];
+  tag: string;
+};
+---
+
+<LogPage
+  page={page}
+  title={`Log · #${tag}`}
+  description={`Entradas del estudio con la etiqueta «${tag}».`}
+  kinds={kinds}
+/>

@@ -22,6 +22,7 @@ pnpm brand            # regenera favicon, apple-touch-icon y og-default
 - **Color:** solo los tokens de `src/styles/tokens.css`. Los componentes usan los roles (`--fondo`, `--texto`, `--vivo`…), no los hex.
 - **Sin estilos ni scripts en línea** (`style="..."`, `onclick`): la CSP los bloquea. Usa clases y `<script>` de Astro.
 - **Sin `<ClientRouter />` ni Shiki** (incompatibles con la CSP). Transiciones con la View Transitions API nativa; código resaltado con `<Prism />`.
+- **El estudio (columna fija):** la habitación (ilustración y, en la fase 1b, escena 3D) es decorativa y `aria-hidden`; la navegación real son enlaces HTML. El contenido nunca va dentro del 3D (spec 7.1).
 - **Movimiento:** estático por defecto; las animaciones van dentro de `@media (prefers-reduced-motion: no-preference)`.
 - **Contenido:** nunca inventes datos. Usa `[POR COMPLETAR]` visible.
 - **Dependencias:** no añadas paquetes sin justificarlo a la persona. pnpm rechaza versiones de menos de 14 días (`pnpm-workspace.yaml`); no lo desactives. Versiones exactas, sin `^`.

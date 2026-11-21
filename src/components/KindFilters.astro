@@ -1,0 +1,76 @@
+---
+/*
+  Pestañas de filtro del log (boceto: Todo · Videos · Proyectos · Notas).
+  Son enlaces a rutas estáticas, sin JavaScript. Solo aparecen los tipos
+  que tienen entradas.
+*/
+import { KIND_LABELS, type LogKind } from "../lib/log";
+
+interface Props {
+  kinds: LogKind[];
+  /** Tipo activo; undefined = "Todo". */
+  active?: LogKind;
+}
+
+const { kinds, active } = Astro.props;
+const ORDEN: LogKind[] = [
+  "video",
+  "short",
+  "project",
+  "devlog",
+  "break",
+  "note",
+];
+const visibles = ORDEN.filter((k) => kinds.includes(k));
+---
+
+{visibles.length > 1 && (
+  <nav aria-label="Filtrar por tipo" class="filtros">
+    <ul role="list">
+      <li>
+        <a href="/log" aria-current={active ? undefined : "page"}>
+          Todo
+        </a>
+      </li>
+      {visibles.map((k) => (
+        <li>
+          <a
+            href={`/log/tipo/${k}`}
+            aria-current={active === k ? "page" : undefined}
+          >
+            {KIND_LABELS[k]}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style>
+  .filtros ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--espacio-6);
+    padding: 0;
+    margin-block-end: var(--espacio-2);
+    list-style: none;
+  }
+  .filtros a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--objetivo-tactil);
+    color: var(--texto-suave);
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .filtros a:hover {
+    color: var(--texto);
+  }
+  .filtros a[aria-current="page"] {
+    color: var(--texto);
+    text-decoration: underline;
+    text-decoration-color: var(--naranja);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 8px;
+  }
+</style>

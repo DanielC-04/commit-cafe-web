@@ -1,6 +1,6 @@
 # Commit&Cafe — Especificación de la web (para agente de programación)
 
-**Versión 1.1 · 2026-11-20.** Esta copia dentro del repo es la fuente de verdad. Cambios respecto a la v1.0 al final, en la sección 15.
+**Versión 1.2 · 2026-11-20.** Esta copia dentro del repo es la fuente de verdad. Cambios al final, en las secciones 15 y 16.
 
 > Léelo completo antes de escribir código. Trabajas **junto a una persona**: estudiante de último año de desarrollo de software, con poca experiencia profesional. Explica cada decisión en lenguaje simple, haz cambios pequeños y evita la sobreingeniería.
 
@@ -12,7 +12,7 @@ El **estudio personal** del creador del canal Commit&Cafe (YouTube, TikTok e Ins
 - Los proyectos se cuentan como **relato poco técnico** (por qué, qué se rompió, qué aprendí) con enlace a GitHub, demo y video.
 - Hoy casi no hay contenido. **Todo el diseño debe funcionar con 3 entradas y seguir funcionando con 300.**
 - Idioma: español (`es`). Preparar la estructura para sumar inglés después, sin implementarlo ahora.
-- Boceto visual de referencia: `Commit&Cafe — boceto web` (inicio de escritorio y página de proyecto). **[POR COMPLETAR]: guardar el boceto en `/docs/boceto/`.** Mientras no esté, la estructura sale de las secciones 6 y 7.
+- Bocetos de referencia en `/docs/boceto/`: `boceto-web.html` (estructura 2D: inicio y página de proyecto) y `estudio-3d.html` (el estudio en 3D). Se unen como describe la sección 7.1.
 
 ## 2. Principio de escalabilidad (lo más importante)
 
@@ -91,7 +91,7 @@ Todas con `draft: boolean` (los borradores no se publican), `publishedAt: date` 
 
 ## 7. Sistema de diseño
 
-**Principios:** un solo momento memorable (la taza viva de la columna fija); todo lo demás sobrio. Sin rejilla de tarjetas idénticas: el contenido va en **filas del log**. Sin etiquetas en mayúsculas sobre cada título. Sin numeración, salvo secuencias reales (historia, episodios). Sin emojis. Sin degradados decorativos. Movimiento solo cuando responde a una acción o para una única animación de entrada.
+**Principios:** un solo momento memorable: **el estudio** de la columna fija (ilustración y, como mejora progresiva, escena 3D; ver 7.1); todo lo demás sobrio. Sin rejilla de tarjetas idénticas: el contenido va en **filas del log**. Sin etiquetas en mayúsculas sobre cada título. Sin numeración, salvo secuencias reales (historia, episodios). Sin emojis. Sin degradados decorativos. Movimiento solo cuando responde a una acción o para una única animación de entrada.
 
 **Color** (marca; no agregar otros). Los dos derivados son solo para superficies y texto secundario:
 
@@ -114,9 +114,30 @@ Reglas: la sección **Pizarra** se invierte (fondo crema, tinta carbón, subraya
 
 En Pizarra el **anillo de foco es carbón**, no naranja (WCAG 2.2 pide ≥ 3:1 para el foco). El naranja ahí solo decora (subrayados gruesos, formas). Tema oscuro por defecto (`color-scheme: dark`); modo claro, no en el inicio. Sobre crema se usa el logo `monocromo_oscuro.svg`.
 
-**Tipografía:** títulos en una geométrica redondeada cercana al logo: **Outfit** o **Nunito** (el texto del logo tiene terminaciones redondeadas; se elige comparándolas en la página de prueba de la fase 0 y se anota en `docs/decisiones.md`); texto en una humanista distinta (**Figtree**); monoespaciada (**JetBrains Mono**) **solo para código real**: hashes, comandos, terminal. Pizarra: la letra manuscrita de la persona escaneada, o una fuente manuscrita como respaldo. Líneas de texto de menos de 80 caracteres.
+**Tipografía:** títulos en una geométrica redondeada cercana al logo: **Outfit** (elegida frente a Nunito en la fase 0); texto en una humanista distinta (**Figtree**); monoespaciada (**JetBrains Mono**) **solo para código real**: hashes, comandos, terminal. Pizarra: la letra manuscrita de la persona escaneada, o una fuente manuscrita como respaldo. Líneas de texto de menos de 80 caracteres.
 
-**Maquetación:** escritorio con columna izquierda fija (~5/12) y contenido a la derecha (~7/12). En móvil, la columna fija se reduce a una cabecera con la taza y el estado, y el resto va en una sola columna.
+**Maquetación:** escritorio con columna izquierda fija (~5/12) y contenido a la derecha (~7/12). En móvil, la columna fija se reduce a una cabecera con el estudio en pequeño y el estado, y el resto va en una sola columna.
+
+### 7.1 El estudio (unión de los dos bocetos)
+
+- **La columna fija es una ventana a la habitación del creador.** La columna derecha es HTML normal con la estructura de `boceto-web.html` (filas del log, relato del proyecto). El contenido nunca vive dentro del 3D: así se indexa, se lee con lector de pantalla y funciona sin WebGL.
+- **Cada objeto es una sección**, y aparece solo si la sección tiene contenido (puerta de contenido):
+
+| Objeto                                        | Sección     | Aparece      |
+| --------------------------------------------- | ----------- | ------------ |
+| Monitor (muestra las últimas entradas reales) | Log         | Siempre      |
+| Taza y escritorio                             | Ahora       | Siempre      |
+| Estante, un libro por proyecto                | Taller      | ≥ 1 proyecto |
+| Caja de roturas                               | Roturas     | ≥ 1 rotura   |
+| Pizarra crema                                 | Pizarra     | Fase 3       |
+| Ventana                                       | Mi historia | Fase 3       |
+
+- **Encuadre por página:** cada página dice a qué objeto mira la cámara (inicio: plano general; `/log`: monitor; `/taller`: estante; proyecto: su libro; `/estudio`: habitación entera; 404: la taza volcada).
+- **Escena y navegación conectadas:** enfocar o pasar sobre un enlace del menú resalta su objeto; hacer clic en un objeto navega a su sección. El `<canvas>` es `aria-hidden`; los enlaces HTML son la navegación real.
+- **Capas, de la más básica a la más rica:**
+  1. **Ilustración** SVG plana de la habitación (siempre; es lo primero que se ve y no frena el LCP). El vapor se anima con CSS.
+  2. **Escena 3D** (Three.js, autoalojado vía pnpm) que sustituye a la ilustración solo si hay WebGL, la pantalla es ancha y no se pidió movimiento reducido ni ahorro de datos. Se carga cuando el navegador está libre.
+- **Estilo 3D:** low-poly y sombreado plano, solo con la paleta de marca, como el logo (vector plano, sin texturas). Nunca se modela ni deforma el `&` del logo.
 
 **Logo y marca:** usar los SVG del kit (`/public/brand/`). Nunca deformar, rotar ni recolorear el `&`. Favicon desde `icono.svg` (`favicon.svg`, `favicon.ico` 32 px, `apple-touch-icon.png` 180 px) y `og-default.png` 1200×630. La "taza viva" anima solo el vapor (trazo naranja separado en `icono.svg`), nunca la forma del `&`. Bajo 150 px, solo el ícono sin texto. Nombre siempre **Commit&Cafe**.
 
@@ -148,7 +169,7 @@ En Pizarra el **anillo de foco es carbón**, no naranja (WCAG 2.2 pide ≥ 3:1 p
 - Respetar `prefers-reduced-motion`; la taza animada debe poder quedar quieta.
 - Elementos reales (`<button>`, `<a href>`, `<label>`); nada de `div` con `onClick`.
 - Imágenes con ancho y alto definidos, `loading="lazy"` salvo la primera; `content-visibility` en listas largas.
-- Presupuesto: JS total de la página de inicio < 50 KB comprimido; fuentes con `font-display: swap` y subconjunto latino.
+- Presupuesto: JS **inicial** de cualquier página < 50 KB comprimido. La escena 3D tiene presupuesto aparte (≤ 200 KB comprimido), se carga diferida y no cuenta para el LCP; fuentes con `font-display: swap` y subconjunto latino.
 
 ## 11. Fases
 
@@ -156,11 +177,13 @@ Cada fase termina con: build limpio, Lighthouse sin regresión, revisión a 1440
 
 **Fase 0 · Cimientos.** Repo, Astro + TypeScript, `AGENTS.md` + `CLAUDE.md`, tokens CSS, fuentes, logos y favicons en `/public/brand`, layouts base (`BaseLayout`, `DeskLayout`), cabeceras y CSP, CI (`astro check` + build + Prettier + `pnpm audit`), despliegue en la URL gratuita del hosting (el dominio puede llegar después). _Criterio:_ una página de prueba publicada con la paleta y la tipografía correctas.
 
-**Fase 1 · Primer lanzamiento (MVP).** Inicio con columna fija y log, `/log`, plantilla de proyecto, `/estudio`, `/contacto`, `/privacidad`, 404, SEO base, analítica, cabeceras de seguridad, colecciones con esquemas y la lógica de "puerta de contenido". Cargar 3–5 entradas reales (por ejemplo, el primer video y el primer proyecto en curso). _Criterio:_ una persona nueva entiende de qué va en 10 segundos y agregar una entrada no requiere tocar código.
+**Fase 1a · Primer lanzamiento (MVP).** Inicio con columna fija (ilustración del estudio) y log, `/log`, plantilla de proyecto, `/estudio`, `/contacto`, `/privacidad`, 404, SEO base, analítica, cabeceras de seguridad, colecciones con esquemas y la lógica de "puerta de contenido". Cargar 3–5 entradas reales (por ejemplo, el primer video y el primer proyecto en curso). _Criterio:_ una persona nueva entiende de qué va en 10 segundos y agregar una entrada no requiere tocar código.
 
-**Fase 2 · Taller y roturas.** Lista de proyectos con estados, devlog dentro de cada proyecto, colección `breaks` y `/roturas`, enlaces a GitHub/demo/video, etiquetas. _Criterio:_ cada proyecto nuevo se publica solo con un archivo MDX.
+**Fase 1b · El estudio en 3D.** Escena Three.js en la columna con monitor (log real), taza, lámpara y ventana; encuadre por página y conexión con la navegación; alternativa estática. _Criterio:_ sin WebGL o con movimiento reducido el sitio se ve completo; con 3D, el JS inicial sigue < 50 KB.
 
-**Fase 3 · Pizarra e historia.** `/pizarra` con la sección invertida a crema, diagramas SVG que se dibujan, `/historia` con línea de tiempo animada con scroll (animaciones dirigidas por scroll con alternativa estática), transiciones suaves entre páginas con degradación elegante. _Criterio:_ funciona sin animaciones y respeta `prefers-reduced-motion`.
+**Fase 2 · Taller y roturas.** Estante 3D con un libro por proyecto y caja de roturas, lista de proyectos con estados, devlog dentro de cada proyecto, colección `breaks` y `/roturas`, enlaces a GitHub/demo/video, etiquetas. _Criterio:_ cada proyecto nuevo se publica solo con un archivo MDX.
+
+**Fase 3 · Pizarra e historia.** Pizarra y ventana en la habitación, `/pizarra` con la sección invertida a crema, diagramas SVG que se dibujan, `/historia` con línea de tiempo animada con scroll (animaciones dirigidas por scroll con alternativa estática), transiciones suaves entre páginas con degradación elegante. _Criterio:_ funciona sin animaciones y respeta `prefers-reduced-motion`.
 
 **Fase 4 · Descubrimiento.** Recursos descargables, búsqueda con Pagefind, RSS, boletín (servicio externo, con consentimiento explícito), imágenes OG por página. _Criterio:_ se puede encontrar cualquier entrada en dos clics o una búsqueda.
 
@@ -178,7 +201,7 @@ Cada fase termina con: build limpio, Lighthouse sin regresión, revisión a 1440
 
 ## 13. Datos que debe aportar la persona
 
-**Para la fase 0:** cuenta de Netlify (hecha) y repositorio en GitHub (hecho) · boceto · elección Outfit vs Nunito (en la página de prueba).
+**Para la fase 0:** hecho (Netlify, GitHub, bocetos, Outfit).
 
 **Para la fase 1:** dominio elegido · handle único para las redes (`@commitandcafe`, `@commitcafe` o `@commit.cafe`) · enlaces de los canales y de GitHub · **`channel_id` de YouTube** · correo de contacto · primer proyecto que se publicará.
 
@@ -203,3 +226,11 @@ Cada fase termina con: build limpio, Lighthouse sin regresión, revisión a 1440
 - Diseño: contrastes medidos; tokens propios para Pizarra (`--tinta-apagada`, `--crema-alta`) y foco carbón sobre crema; tipografía de títulos a elegir entre Outfit y Nunito.
 - Seguridad: CSP con hashes de Astro (`security.csp`) + `_headers`; regla de 14 días aplicada por pnpm.
 - Proceso: `CLAUDE.md` importa `AGENTS.md`; Taste Skill solo tras revisión; datos de la persona ordenados por fase.
+
+## 16. Cambios de la v1.2 (2026-11-20)
+
+- Bocetos en `/docs/boceto/` y su unión en la sección 7.1: el estudio 3D como escenario de la columna fija en todas las páginas, contenido siempre en HTML.
+- El "momento memorable" pasa de la taza al estudio completo.
+- Presupuesto de JS: < 50 KB inicial + ≤ 200 KB diferidos para la escena 3D.
+- Fase 1 dividida en 1a (sitio HTML con ilustración) y 1b (escena 3D). Fases 2 y 3 suman estante, caja, pizarra y ventana.
+- Títulos en Outfit.

@@ -1,0 +1,105 @@
+---
+/*
+  Una fila del log (boceto-web.html): hash | título y resumen | tipo y fecha.
+  Toda la fila es un solo enlace. Si lleva fuera del sitio (YouTube,
+  TikTok…), se avisa a lectores de pantalla.
+*/
+import { KIND_LABELS, type LogEntry } from "../lib/log";
+import { formatDate, isoDate } from "../lib/format";
+
+interface Props {
+  entry: LogEntry;
+  /** Nivel del título de la fila (h2 en listas sueltas, h3 bajo un h2). */
+  level?: 2 | 3;
+}
+
+const { entry, level = 2 } = Astro.props;
+const Heading = `h${level}` as "h2" | "h3";
+const PLATAFORMAS = {
+  youtube: "YouTube",
+  tiktok: "TikTok",
+  instagram: "Instagram",
+  web: "",
+};
+const destino = entry.external
+  ? PLATAFORMAS[entry.platform] || "otro sitio"
+  : "";
+---
+
+<li class="fila">
+  <a
+    href={entry.url}
+    class="fila__enlace"
+    rel={entry.external ? "noopener" : undefined}
+  >
+    <code class="fila__hash">{entry.hash}</code>
+    <span class="fila__texto">
+      <Heading class="fila__titulo">
+        {entry.title}
+        {entry.external && <span class="visually-hidden"> (en {destino})</span>}
+      </Heading>
+      {entry.summary && <span class="fila__resumen">{entry.summary}</span>}
+    </span>
+    <span class="fila__meta">
+      {KIND_LABELS[entry.kind]}
+      <time datetime={isoDate(entry.publishedAt)}>
+        {formatDate(entry.publishedAt)}
+      </time>
+    </span>
+  </a>
+</li>
+
+<style>
+  .fila {
+    border-block-start: 1px solid var(--superficie);
+  }
+  .fila__enlace {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr auto;
+    gap: var(--espacio-4) var(--espacio-6);
+    padding-block: var(--espacio-6);
+    text-decoration: none;
+    color: var(--texto);
+  }
+  .fila__hash {
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+    padding-block-start: 0.35em;
+  }
+  .fila__titulo {
+    font-size: var(--titulo-3);
+    font-weight: 600;
+    text-wrap: balance;
+  }
+  .fila__enlace:hover .fila__titulo {
+    text-decoration: underline;
+    text-decoration-color: var(--naranja);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
+  .fila__resumen {
+    display: block;
+    margin-block-start: var(--espacio-1);
+    color: var(--texto-suave);
+    max-inline-size: 60ch;
+  }
+  .fila__meta {
+    display: grid;
+    justify-items: end;
+    align-content: start;
+    color: var(--texto-suave);
+    font-size: var(--texto-sm);
+    text-align: end;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 40rem) {
+    .fila__enlace {
+      grid-template-columns: 1fr auto;
+    }
+    .fila__hash {
+      grid-column: 1 / -1;
+      padding: 0;
+    }
+  }
+</style>

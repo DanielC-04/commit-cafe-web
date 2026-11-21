@@ -19,7 +19,11 @@ export default defineConfig({
   // en dos líneas ("comogit commit"). `true` comprime sin perder espacios.
   compressHTML: true,
 
-  integrations: [mdx(), sitemap()],
+  integrations: [
+    mdx(),
+    // La 404 no va al sitemap (spec 8).
+    sitemap({ filter: (page) => !page.includes("/404") }),
+  ],
 
   // Resaltado de código con Prism (clases CSS). Shiki usa estilos en línea
   // y la CSP los bloquearía.
@@ -33,15 +37,6 @@ export default defineConfig({
       provider: fontProviders.fontsource(),
       name: "Outfit",
       cssVariable: "--font-outfit",
-      weights: ["400 800"],
-      subsets: ["latin"],
-      fallbacks: ["sans-serif"],
-    },
-    {
-      // Candidata alternativa para títulos (fase 0: comparar con Outfit).
-      provider: fontProviders.fontsource(),
-      name: "Nunito",
-      cssVariable: "--font-nunito",
       weights: ["400 800"],
       subsets: ["latin"],
       fallbacks: ["sans-serif"],
