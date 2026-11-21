@@ -41,12 +41,20 @@ const urlOpcional = z.preprocess(
 );
 
 /**
-  Texto del estado "Ahora": si el panel lo guarda vacío ("") se convierte en
-  null, y la columna sigue mostrando [POR COMPLETAR].
+  Texto opcional: si el panel lo guarda vacío ("") se convierte en null.
 */
-const textoAhora = z.preprocess(
+const textoONull = z.preprocess(
   (valor) => (typeof valor === "string" && !valor.trim() ? null : valor),
   z.string().nullable(),
+);
+
+/** Quita elementos vacíos que el panel puede dejar en una lista. */
+const listaDeTexto = z.preprocess(
+  (valor) =>
+    Array.isArray(valor)
+      ? valor.filter((item) => typeof item !== "string" || item.trim())
+      : valor,
+  z.array(z.string().trim()).default([]),
 );
 
 /** Proyectos del Taller: un relato poco técnico por proyecto. */
@@ -131,11 +139,36 @@ const now = defineCollection({
   loader: file("./src/content/now.json"),
   schema: z.object({
     /** Qué se está construyendo ahora, en una frase. */
-    building: textoAhora,
+    building: textoONull,
     /** Último commit o avance, en una frase. */
-    lastCommit: textoAhora,
+    lastCommit: textoONull,
     updatedAt: z.coerce.date(),
   }),
 });
 
-export const collections = { projects, devlog, breaks, posts, videos, now };
+/** Datos personales y listas de la página Estudio, editables desde el panel. */
+const estudio = defineCollection({
+  loader: file("./src/content/estudio.json"),
+  schema: z.object({
+    /** Nombre para la presentación y los datos estructurados del sitio. */
+    nombre: textoONull,
+    /** Presentación con párrafos separados por una línea en blanco. */
+    presentacion: textoONull,
+    /** Elementos del equipo de trabajo. */
+    setup: listaDeTexto,
+    /** Herramientas usadas en el día a día. */
+    herramientas: listaDeTexto,
+    /** Pasos del proceso para hacer un video. */
+    proceso: listaDeTexto,
+  }),
+});
+
+export const collections = {
+  projects,
+  devlog,
+  breaks,
+  posts,
+  videos,
+  now,
+  estudio,
+};

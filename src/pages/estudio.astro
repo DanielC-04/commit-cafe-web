@@ -1,11 +1,18 @@
 ---
 /*
-  /estudio — quién está detrás, el setup y cómo se hace un video (spec 6).
-  Todo lo personal queda como [POR COMPLETAR] hasta que la persona lo
-  escriba: nunca se inventa (spec 12.6).
+  /estudio — contenido personal desde src/content/estudio.json, editable en el panel.
 */
+import { getEntry } from "astro:content";
 import DeskLayout from "../layouts/DeskLayout.astro";
-import { SITE, POR_COMPLETAR } from "../site";
+import { POR_COMPLETAR } from "../site";
+
+const estudio = await getEntry("estudio", "estudio");
+// Si falta el archivo, mejor que el build falle con un mensaje claro.
+if (!estudio) throw new Error("Falta src/content/estudio.json");
+const { data } = estudio;
+const parrafos = data.presentacion
+  ?.split(/\n\s*\n/)
+  .filter((parrafo) => parrafo.trim());
 ---
 
 <DeskLayout
@@ -22,23 +29,56 @@ import { SITE, POR_COMPLETAR } from "../site";
     </p>
 
     <h2>Quién soy</h2>
-    <p class="pendiente">
-      {SITE.author ?? POR_COMPLETAR}: presentación en dos o tres frases.
-    </p>
+    {data.nombre || parrafos?.length ? (
+      <>
+        {data.nombre && <p>Soy {data.nombre}.</p>}
+        {parrafos?.map((parrafo) => (
+          <p>{parrafo}</p>
+        ))}
+      </>
+    ) : (
+      <p class="pendiente">
+        {POR_COMPLETAR}: presentación en dos o tres frases.
+      </p>
+    )}
 
     <h2>Setup</h2>
-    <p class="pendiente">
-      {POR_COMPLETAR}: equipo, monitor, micrófono, cámara.
-    </p>
+    {data.setup.length ? (
+      <ul>
+        {data.setup.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    ) : (
+      <p class="pendiente">
+        {POR_COMPLETAR}: equipo, monitor, micrófono, cámara.
+      </p>
+    )}
 
     <h2>Herramientas</h2>
-    <p class="pendiente">
-      {POR_COMPLETAR}: editor, terminal, lenguajes y apps del día a día.
-    </p>
+    {data.herramientas.length ? (
+      <ul>
+        {data.herramientas.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    ) : (
+      <p class="pendiente">
+        {POR_COMPLETAR}: editor, terminal, lenguajes y apps del día a día.
+      </p>
+    )}
 
     <h2>Cómo hago un video</h2>
-    <p class="pendiente">
-      {POR_COMPLETAR}: de la idea al video publicado, paso a paso.
-    </p>
+    {data.proceso.length ? (
+      <ol>
+        {data.proceso.map((paso) => (
+          <li>{paso}</li>
+        ))}
+      </ol>
+    ) : (
+      <p class="pendiente">
+        {POR_COMPLETAR}: de la idea al video publicado, paso a paso.
+      </p>
+    )}
   </div>
 </DeskLayout>
